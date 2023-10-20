@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
+import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -62,10 +63,8 @@ fun App(frameWindowScope: FrameWindowScope) {
     MaterialTheme {
         Column(Modifier.fillMaxSize().background(CurrentUiColor.窗口_背景颜色)) {
             Row(Modifier.fillMaxWidth().weight(1f).background(CurrentUiColor.预览区_背景颜色)) {
-                Box(modifier = Modifier.weight(1f)) {
-                    Row {
-                        Text("test1")
-                    }
+                Box(modifier = Modifier.weight(1f).width(IntrinsicSize.Max).height(IntrinsicSize.Max)) {
+
 
                 }
                 OptionPanel(Modifier.width(240.dp).fillMaxHeight())
@@ -130,7 +129,7 @@ fun main(args: Array<String>) = application {
 @Composable
 fun OptionPanel(modifier: Modifier = Modifier) {
     Column(modifier
-        .background(Color.Blue.copy(alpha = 0.1f))
+        .background(uiColor.配置面板_背景颜色)
         .focusable(true)
         .drawBehind {
             val borderSize = 1.dp.toPx();
@@ -144,7 +143,7 @@ fun OptionPanel(modifier: Modifier = Modifier) {
     ) {
         DayNightModeSwitchButton()
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundOffset * 100)}")
+            Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundOffset * 100)}", color = uiColor.配置面板_标签_文字颜色)
             Slider(
                 value = UiImageData.colorBackgroundOffset,
                 onValueChange = {
@@ -154,6 +153,11 @@ fun OptionPanel(modifier: Modifier = Modifier) {
                 onValueChangeFinished = {
                     println("value change finished")
                 },
+                colors = SliderDefaults.colors(
+                    thumbColor = uiColor.配置面板_滑杆_手柄颜色,
+                    activeTrackColor = uiColor.配置面板_滑杆_有效条颜色,
+                    inactiveTrackColor = uiColor.配置面板_滑杆_无效条颜色,
+                )
             )
         }
 

@@ -34,7 +34,12 @@ interface UiColor {
     val 素材项_色彩选项_蓝色_未选中_背景颜色: Color
     val 素材项_色彩选项_蓝色_选中_背景颜色: Color
 
+    val 配置面板_背景颜色: Color
     val 配置面板_标签_文字颜色: Color
+    val 配置面板_滑杆_手柄颜色: Color
+    val 配置面板_滑杆_有效条颜色: Color
+    val 配置面板_滑杆_无效条颜色: Color
+
 
     val 底部提示条_背景颜色: Color
     val 底部提示条_文字颜色: Color
@@ -63,7 +68,11 @@ object CurrentUiColor : UiColor {
     override var 素材项_色彩选项_绿色_选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_绿色_选中_背景颜色)
     override var 素材项_色彩选项_蓝色_未选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_蓝色_未选中_背景颜色)
     override var 素材项_色彩选项_蓝色_选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_蓝色_选中_背景颜色)
+    override var 配置面板_背景颜色: Color by mutableStateOf(selectedColor.配置面板_背景颜色)
     override var 配置面板_标签_文字颜色: Color by mutableStateOf(selectedColor.配置面板_标签_文字颜色)
+    override var 配置面板_滑杆_手柄颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_手柄颜色)
+    override var 配置面板_滑杆_有效条颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_有效条颜色)
+    override var 配置面板_滑杆_无效条颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_无效条颜色)
     override var 底部提示条_背景颜色: Color by mutableStateOf(selectedColor.底部提示条_背景颜色)
     override var 底部提示条_文字颜色: Color by mutableStateOf(selectedColor.底部提示条_文字颜色)
     override var 分割线颜色: Color by mutableStateOf(selectedColor.分割线颜色)
@@ -122,8 +131,20 @@ object CurrentUiColor : UiColor {
         素材项_色彩选项_蓝色_未选中_背景颜色 = transition.animateColor { state ->
             state.素材项_色彩选项_蓝色_未选中_背景颜色
         }.value
+        配置面板_背景颜色 = transition.animateColor { state ->
+            state.配置面板_背景颜色
+        }.value
         配置面板_标签_文字颜色 = transition.animateColor { state ->
             state.配置面板_标签_文字颜色
+        }.value
+        配置面板_滑杆_手柄颜色 = transition.animateColor { state ->
+            state.配置面板_滑杆_手柄颜色
+        }.value
+        配置面板_滑杆_有效条颜色 = transition.animateColor { state ->
+            state.配置面板_滑杆_有效条颜色
+        }.value
+        配置面板_滑杆_无效条颜色 = transition.animateColor { state ->
+            state.配置面板_滑杆_无效条颜色
         }.value
         底部提示条_背景颜色 = transition.animateColor { state ->
             state.底部提示条_背景颜色
@@ -167,7 +188,11 @@ object LightUiColor : UiColor {
     override val 素材项_色彩选项_蓝色_选中_背景颜色: Color = Color.Blue
     override val 素材项_色彩选项_蓝色_未选中_背景颜色: Color = 素材项_色彩选项_蓝色_选中_背景颜色.copy(0.2f)
 
+    override val 配置面板_背景颜色: Color = Color(0xFFE7F8FF)
     override val 配置面板_标签_文字颜色: Color = 素材项_文字颜色
+    override val 配置面板_滑杆_手柄颜色 = Color(0xFFCF1B1B)
+    override val 配置面板_滑杆_有效条颜色 = Color(0xFF1B93FF)
+    override val 配置面板_滑杆_无效条颜色 = Color(0xFFB2D3FF)
 
     override val 底部提示条_背景颜色: Color = Color(0xFFCCCCCC)
     override val 底部提示条_文字颜色: Color = 素材项_文字颜色
@@ -196,7 +221,11 @@ object DarkUiColor : UiColor {
     override val 素材项_色彩选项_蓝色_选中_背景颜色: Color = Color.Blue
     override val 素材项_色彩选项_蓝色_未选中_背景颜色: Color = 素材项_色彩选项_蓝色_选中_背景颜色.copy(0.2f)
 
-    override val 配置面板_标签_文字颜色: Color = LightUiColor.素材项_文字颜色
+    override val 配置面板_背景颜色: Color = Color(0xFF1B2629)
+    override val 配置面板_标签_文字颜色: Color = 素材项_文字颜色
+    override val 配置面板_滑杆_手柄颜色 = Color(0xFFFF8585)
+    override val 配置面板_滑杆_有效条颜色 = Color(0xFF8FD5FF)
+    override val 配置面板_滑杆_无效条颜色 = Color(0xFF0B2EBD)
 
     override val 底部提示条_背景颜色: Color = Color(0xFF333333)
     override val 底部提示条_文字颜色: Color = 素材项_文字颜色
