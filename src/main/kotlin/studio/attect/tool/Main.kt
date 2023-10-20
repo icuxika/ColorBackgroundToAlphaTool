@@ -11,6 +11,7 @@ import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Slider
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
@@ -130,6 +131,7 @@ fun main(args: Array<String>) = application {
 fun OptionPanel(modifier: Modifier = Modifier) {
     Column(modifier
         .background(Color.Blue.copy(alpha = 0.1f))
+        .focusable(true)
         .drawBehind {
             val borderSize = 1.dp.toPx();
             drawLine(
@@ -141,6 +143,20 @@ fun OptionPanel(modifier: Modifier = Modifier) {
         }
     ) {
         DayNightModeSwitchButton()
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundOffset * 100)}")
+            Slider(
+                value = UiImageData.colorBackgroundOffset,
+                onValueChange = {
+                    UiImageData.colorBackgroundOffset = it
+                    println("value:$it ${(it * 100).toInt()}")
+                },
+                onValueChangeFinished = {
+                    println("value change finished")
+                },
+            )
+        }
+
     }
 }
 

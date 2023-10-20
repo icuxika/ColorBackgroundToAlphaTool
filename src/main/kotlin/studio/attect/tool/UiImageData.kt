@@ -85,4 +85,8 @@ object UiImageData {
         }
 
 
+    /**
+     * 计算时容许与指定颜色的偏差值
+     */
+    var colorBackgroundOffset by mutableStateOf(0f)
 }

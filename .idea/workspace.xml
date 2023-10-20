@@ -4,12 +4,8 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="39db5993-1d5a-4d31-9749-aab1992be9e5" name="更改" comment="颜色变量改名">
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icon/daytime-mode.svg" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/main/resources/icon/night-mode.svg" afterDir="false" />
+    <list default="true" id="39db5993-1d5a-4d31-9749-aab1992be9e5" name="更改" comment="明暗切换、素材选择完善、配置面板">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/studio/attect/tool/Main.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/studio/attect/tool/Main.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/kotlin/studio/attect/tool/UiColor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/kotlin/studio/attect/tool/UiColor.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -102,7 +98,7 @@
       <updated>1697016269362</updated>
       <workItem from="1697016270399" duration="1744000" />
       <workItem from="1697075349012" duration="255000" />
-      <workItem from="1697075639326" duration="56920000" />
+      <workItem from="1697075639326" duration="57976000" />
     </task>
     <task id="LOCAL-00001" summary="项目初始化">
       <option name="closed" value="true" />
@@ -128,7 +124,15 @@
       <option name="project" value="LOCAL" />
       <updated>1697782743117</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="明暗切换、素材选择完善、配置面板">
+      <option name="closed" value="true" />
+      <created>1697784805734</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1697784805734</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -151,7 +155,8 @@
     <MESSAGE value="项目初始化" />
     <MESSAGE value="实现拖拽和选择两种文件添加方式" />
     <MESSAGE value="颜色变量改名" />
-    <option name="LAST_COMMIT_MESSAGE" value="颜色变量改名" />
+    <MESSAGE value="明暗切换、素材选择完善、配置面板" />
+    <option name="LAST_COMMIT_MESSAGE" value="明暗切换、素材选择完善、配置面板" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
