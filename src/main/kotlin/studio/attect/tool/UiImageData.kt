@@ -13,6 +13,25 @@ import java.io.ByteArrayInputStream
 object UiImageData {
 
     /**
+     * 预览的图片
+     */
+    var previewImage by mutableStateOf<ImageBitmap?>(null)
+        private set
+
+    /**
+     * 预览的图片的数据，实际也为计算结果
+     */
+    var previewImageData = ByteArray(0)
+        set(value) {
+            previewImage = if (value.size == 0) {
+                null
+            } else {
+                loadImageBitmap(ByteArrayInputStream(value))
+            }
+            field = value
+        }
+
+    /**
      * 用于显示的黑色背景图片
      */
     var blackBackgroundImage by mutableStateOf<ImageBitmap?>(null)

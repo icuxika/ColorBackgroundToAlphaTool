@@ -27,6 +27,7 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 import kotlinx.coroutines.CoroutineName
@@ -63,8 +64,13 @@ fun App(frameWindowScope: FrameWindowScope) {
     MaterialTheme {
         Column(Modifier.fillMaxSize().background(CurrentUiColor.窗口_背景颜色)) {
             Row(Modifier.fillMaxWidth().weight(1f).background(CurrentUiColor.预览区_背景颜色)) {
-                Box(modifier = Modifier.weight(1f).width(IntrinsicSize.Max).height(IntrinsicSize.Max)) {
-
+                Box(modifier = Modifier.weight(1f).fillMaxHeight().width(IntrinsicSize.Max).height(IntrinsicSize.Max)) {
+                    val currentImage = UiImageData.previewImage
+                    if (currentImage == null) {
+                        Text("请按底部提示提供素材", color = uiColor.预览区_文字颜色, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
+                    } else {
+                        Image(currentImage, contentDescription = "预览图片", modifier = Modifier.fillMaxSize())
+                    }
 
                 }
                 OptionPanel(Modifier.width(240.dp).fillMaxHeight())
@@ -118,7 +124,7 @@ fun main(args: Array<String>) = application {
 //    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/cap/1_black.png")).readAllBytes()
 
     CurrentUiColor.init()
-    Window(state = windowState, onCloseRequest = ::exitApplication) {
+    Window(state = windowState, onCloseRequest = ::exitApplication, title = "差色背景去除工具") {
         App(this)
     }
 }

@@ -16,6 +16,7 @@ interface UiColor {
     val 窗口_背景颜色: Color
 
     val 预览区_背景颜色: Color
+    val 预览区_文字颜色: Color
 
     val 素材区_背景颜色: Color
     val 素材区_滚动条颜色: Color
@@ -53,6 +54,7 @@ object CurrentUiColor : UiColor {
     lateinit var transition: Transition<UiColor>
     override var 窗口_背景颜色: Color by mutableStateOf(selectedColor.窗口_背景颜色)
     override var 预览区_背景颜色: Color by mutableStateOf(selectedColor.预览区_背景颜色)
+    override var 预览区_文字颜色: Color by mutableStateOf(selectedColor.预览区_文字颜色)
     override var 素材区_背景颜色: Color by mutableStateOf(selectedColor.素材区_背景颜色)
     override var 素材区_滚动条颜色: Color by mutableStateOf(selectedColor.素材区_滚动条颜色)
     override var 素材区_滚动条激活颜色: Color by mutableStateOf(selectedColor.素材区_滚动条激活颜色)
@@ -85,6 +87,9 @@ object CurrentUiColor : UiColor {
         }.value
         预览区_背景颜色 = transition.animateColor { state ->
             state.预览区_背景颜色
+        }.value
+        预览区_文字颜色 = transition.animateColor { state ->
+            state.预览区_文字颜色
         }.value
         素材区_背景颜色 = transition.animateColor { state ->
             state.素材区_背景颜色
@@ -171,6 +176,7 @@ object CurrentUiColor : UiColor {
 object LightUiColor : UiColor {
     override val 窗口_背景颜色: Color = Color.White
     override val 预览区_背景颜色: Color = 窗口_背景颜色
+    override val 预览区_文字颜色: Color = Color(0xFF333333)
     override val 素材区_背景颜色: Color = Color(0XFFF8F8F8)
     override val 素材区_滚动条颜色: Color = Color.Black.copy(alpha = 0.5f)
     override val 素材区_滚动条激活颜色: Color = Color.Black.copy(alpha = 0.8f)
@@ -204,6 +210,7 @@ object LightUiColor : UiColor {
 object DarkUiColor : UiColor {
     override val 窗口_背景颜色: Color = Color.Black
     override val 预览区_背景颜色: Color = 窗口_背景颜色
+    override val 预览区_文字颜色: Color = Color(0xFFCCCCCC)
     override val 素材区_背景颜色: Color = Color(0xff080808)
     override val 素材区_滚动条颜色: Color = Color.White.copy(alpha = 0.5f)
     override val 素材区_滚动条激活颜色: Color = Color.White.copy(alpha = 0.8f)
