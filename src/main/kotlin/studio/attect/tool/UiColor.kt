@@ -36,6 +36,8 @@ interface UiColor {
 
     val 底部提示条_背景颜色: Color
     val 底部提示条_文字颜色: Color
+
+    val 分割线颜色: Color
 }
 
 @Suppress("NonAsciiCharacters")
@@ -61,6 +63,7 @@ object CurrentUiColor : UiColor {
     override var 素材项_色彩选项_蓝色_选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_蓝色_选中_背景颜色)
     override var 底部提示条_背景颜色: Color by mutableStateOf(selectedColor.底部提示条_背景颜色)
     override var 底部提示条_文字颜色: Color by mutableStateOf(selectedColor.底部提示条_文字颜色)
+    override var 分割线颜色: Color by mutableStateOf(selectedColor.分割线颜色)
 
     @Composable
     fun init() {
@@ -122,10 +125,17 @@ object CurrentUiColor : UiColor {
         底部提示条_文字颜色 = transition.animateColor { state ->
             state.底部提示条_文字颜色
         }.value
+        分割线颜色 = transition.animateColor { state ->
+            state.分割线颜色
+        }.value
     }
 
     fun changeColor(uiColor: UiColor) {
         selectedColor = uiColor
+    }
+
+    fun currentColor(): UiColor {
+        return selectedColor
     }
 
 }
@@ -153,6 +163,8 @@ object LightUiColor : UiColor {
 
     override val 底部提示条_背景颜色: Color = Color(0xFFCCCCCC)
     override val 底部提示条_文字颜色: Color = 素材项_文字颜色
+
+    override val 分割线颜色: Color = Color.DarkGray
 }
 
 @Suppress("NonAsciiCharacters")
@@ -178,5 +190,7 @@ object DarkUiColor : UiColor {
 
     override val 底部提示条_背景颜色: Color = Color(0xFF333333)
     override val 底部提示条_文字颜色: Color = 素材项_文字颜色
+
+    override val 分割线颜色: Color = Color.LightGray
 
 }

@@ -10,30 +10,32 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toAwtImage
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.DpSize
-import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineName
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jetbrains.skiko.toImage
 import java.awt.Cursor
-import java.awt.FileDialog
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import java.io.File
-import java.io.FileInputStream
 import java.net.URI
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KMutableProperty0
@@ -57,21 +59,18 @@ val fileDialogScope = object : CoroutineScope {
 @Preview
 fun App(frameWindowScope: FrameWindowScope) {
     MaterialTheme {
-        Column(Modifier.fillMaxSize().background(CurrentUiColor.窗口背景颜色)) {
-            Row(Modifier.fillMaxWidth().weight(1f).background(CurrentUiColor.预览区背景颜色)) {
-                Text("test1")
-                Button(onClick = {
-                    CurrentUiColor.changeColor(LightUiColor)
-                }) {
-                    Text("Light")
+        Column(Modifier.fillMaxSize().background(CurrentUiColor.窗口_背景颜色)) {
+            Row(Modifier.fillMaxWidth().weight(1f).background(CurrentUiColor.预览区_背景颜色)) {
+                Box(modifier = Modifier.weight(1f)) {
+                    Row {
+                        Text("test1")
+                    }
+
                 }
-                Button(onClick = {
-                    CurrentUiColor.changeColor(DarkUiColor)
-                }) {
-                    Text("Dark")
-                }
+                OptionPanel(Modifier.width(240.dp).fillMaxHeight())
+
             }
-            Box(modifier = Modifier.height(200.dp).background(CurrentUiColor.素材区背景颜色)) {
+            Box(modifier = Modifier.height(200.dp).background(CurrentUiColor.素材区_背景颜色)) {
                 val scrollState = rememberScrollState()
                 Row(modifier = Modifier.fillMaxSize().horizontalScroll(scrollState)) {
                     SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.whiteBackgroundImage, contentDescription = "白色背景图片", noImageText = "点击添加白色背景图片", targetByteArray = UiImageData::whiteBackgroundImageData)
@@ -89,13 +88,13 @@ fun App(frameWindowScope: FrameWindowScope) {
                         thickness = 8.dp,
                         shape = RoundedCornerShape(4.dp),
                         hoverDurationMillis = 300,
-                        unhoverColor = CurrentUiColor.素材区滚动条颜色,
-                        hoverColor = CurrentUiColor.素材区滚动条激活颜色
+                        unhoverColor = CurrentUiColor.素材区_滚动条颜色,
+                        hoverColor = CurrentUiColor.素材区_滚动条激活颜色
                     )
                 )
             }
-            Row(modifier = Modifier.fillMaxWidth().background(CurrentUiColor.底部提示条背景颜色).padding(5.dp)) {
-                Text(globalHint, color = CurrentUiColor.底部提示条文字颜色)
+            Row(modifier = Modifier.fillMaxWidth().background(CurrentUiColor.底部提示条_背景颜色).padding(5.dp)) {
+                Text(globalHint, color = CurrentUiColor.底部提示条_文字颜色)
             }
         }
     }
@@ -115,12 +114,70 @@ fun main(args: Array<String>) = application {
         windowState.size = DpSize((screenSize.width * 0.6).dp, (screenSize.height * 0.6).dp)
     }
 
-    UiImageData.whiteBackgroundImageData = FileInputStream(File("F:/cap/1_white.png")).readAllBytes()
-    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/cap/1_black.png")).readAllBytes()
+//    UiImageData.whiteBackgroundImageData = FileInputStream(File("F:/cap/1_white.png")).readAllBytes()
+//    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/cap/1_black.png")).readAllBytes()
 
     CurrentUiColor.init()
     Window(state = windowState, onCloseRequest = ::exitApplication) {
         App(this)
+    }
+}
+
+/**
+ * 选项面板
+ */
+@Composable
+fun OptionPanel(modifier: Modifier = Modifier) {
+    Column(modifier
+        .background(Color.Blue.copy(alpha = 0.1f))
+        .drawBehind {
+            val borderSize = 1.dp.toPx();
+            drawLine(
+                color = uiColor.分割线颜色,
+                start = Offset(0f, size.height),
+                end = Offset(size.width, size.height),
+                strokeWidth = borderSize
+            )
+        }
+    ) {
+        DayNightModeSwitchButton()
+    }
+}
+
+/**
+ * 明暗模式切换按钮
+ */
+@Composable
+fun DayNightModeSwitchButton(modifier: Modifier = Modifier) {
+    val iconPath = if (uiColor.currentColor() == LightUiColor) {
+        "icon/daytime-mode.svg"
+    } else {
+        "icon/night-mode.svg"
+    }
+    val description = if (uiColor.currentColor() == LightUiColor) {
+        "切换到夜间模式"
+    } else {
+        "切换到日间模式"
+    }
+    Box(modifier = modifier.fillMaxWidth()) {
+        Box(modifier = Modifier
+            .align(Alignment.CenterEnd)
+            .width(32.dp)
+            .height(32.dp)
+            .clip(RoundedCornerShape(0.dp, 0.dp, 0.dp, 12.dp))
+            .focusable(true)
+            .clickable {
+                if (uiColor.currentColor() == LightUiColor) {
+                    uiColor.changeColor(DarkUiColor)
+                } else {
+                    uiColor.changeColor(LightUiColor)
+                }
+            }
+            .padding(4.dp)
+        ) {
+            Image(painter = painterResource(iconPath), contentDescription = description)
+        }
+
     }
 }
 
@@ -132,9 +189,9 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
     val transition = updateTransition(isHovered)
     val backgroundColor = transition.animateColor { state ->
         if (state) {
-            CurrentUiColor.素材项指向背景颜色
+            CurrentUiColor.素材项_指向背景颜色
         } else {
-            CurrentUiColor.素材项默认背景颜色
+            CurrentUiColor.素材项_默认背景颜色
         }
     }
     val a = UiImageData::colorABackgroundImageData
@@ -150,66 +207,140 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
         }
     }
 
-    Column(
+    Row(
         modifier = modifier
             .fillMaxHeight()
-            .width(190.dp)
             .padding(5.dp)
-            .background(backgroundColor.value)
-            .focusable(true)
-            .hoverable(interactionSource)
-            .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)))
-            .onExternalDrag(true,
-                onDragStart = { },
-                onDragExit = {
-                    hintText = noImageText
-                    globalHint = "取消了拖拽图片到素材位置的操作"
-                },
-                onDrag = { externalDragValue ->
-                    val dragData = externalDragValue.dragData
-                    hintText = if (dragData is DragData.Image || dragData is DragData.FilesList) {
-                        "放到此处"
-                    } else {
-                        "你拽的不是图片！"
-                    }
-                    if (dragData is DragData.Image) {
-                        globalHint = "你拖拽了一个图片数据，将放到：${contentDescription}位置"
-                    } else if (dragData is DragData.FilesList) {
-                        globalHint = "你拖拽了文件数据，将尝试作为图片放到：${contentDescription}位置"
-
-                    }
-                },
-                onDrop = { externalDragValue ->
-                    hintText = noImageText
-                    val dragData = externalDragValue.dragData
-                    if (dragData is DragData.Image) {
-                        val image = dragData.readImage().toAwtImage(Density(1f), LayoutDirection.Ltr)
-                        val bufferedImage = BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB)
-                        bufferedImage.graphics.drawImage(image, 0, 0, null)
-                        val data = bufferedImage.toImage().encodeToData()?.bytes
-                        if (data != null) {
-                            targetByteArray.set(data)
+            .clip(RoundedCornerShape(8.dp))
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxHeight()
+                .width(190.dp)
+                .background(backgroundColor.value)
+                .focusable(true)
+                .hoverable(interactionSource)
+                .pointerHoverIcon(PointerIcon(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)))
+                .onExternalDrag(true,
+                    onDragStart = { },
+                    onDragExit = {
+                        hintText = noImageText
+                        globalHint = "取消了拖拽图片到素材位置的操作"
+                    },
+                    onDrag = { externalDragValue ->
+                        val dragData = externalDragValue.dragData
+                        hintText = if (dragData is DragData.Image || dragData is DragData.FilesList) {
+                            "放到此处"
+                        } else {
+                            "你拽的不是图片！"
                         }
-                    } else if (dragData is DragData.FilesList) {
-                        val fileList = dragData.readFiles()
-                        if (fileList.isEmpty()) return@onExternalDrag
-                        val file = File(URI.create(fileList.first()).path.substring(1))
-                        file.tryLoadToStock(contentDescription, "拖拽", targetByteArray)
+                        if (dragData is DragData.Image) {
+                            globalHint = "你拖拽了一个图片数据，将放到：${contentDescription}位置"
+                        } else if (dragData is DragData.FilesList) {
+                            globalHint = "你拖拽了文件数据，将尝试作为图片放到：${contentDescription}位置"
+
+                        }
+                    },
+                    onDrop = { externalDragValue ->
+                        hintText = noImageText
+                        val dragData = externalDragValue.dragData
+                        if (dragData is DragData.Image) {
+                            val image = dragData.readImage().toAwtImage(Density(1f), LayoutDirection.Ltr)
+                            val bufferedImage = BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_ARGB)
+                            bufferedImage.graphics.drawImage(image, 0, 0, null)
+                            val data = bufferedImage.toImage().encodeToData()?.bytes
+                            if (data != null) {
+                                targetByteArray.set(data)
+                            }
+                        } else if (dragData is DragData.FilesList) {
+                            val fileList = dragData.readFiles()
+                            if (fileList.isEmpty()) return@onExternalDrag
+                            val file = File(URI.create(fileList.first()).path.substring(1))
+                            file.tryLoadToStock(contentDescription, "拖拽", targetByteArray)
+                        }
+                    })
+                .clickable {
+                    if (!showSelectFileDialog) {
+                        showSelectFileDialog = true
                     }
-                })
-            .clickable {
-                if (!showSelectFileDialog) {
-                    showSelectFileDialog = true
+                }
+        ) {
+            imageBitmap?.let {
+                Image(BitmapPainter(it), contentDescription, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxWidth().weight(1f))
+            } ?: run {
+                Box(Modifier.fillMaxWidth().weight(1f)) {
+                    Text(hintText, color = CurrentUiColor.素材项_文字颜色, modifier = Modifier.align(Alignment.Center), fontSize = 12.sp)
                 }
             }
-    ) {
-        imageBitmap?.let {
-            Image(BitmapPainter(it), contentDescription, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxWidth().weight(1f))
-        } ?: run {
-            Box(Modifier.fillMaxWidth().weight(1f)) {
-                Text(hintText, color = CurrentUiColor.素材项文字颜色, modifier = Modifier.align(Alignment.Center))
+            Text(contentDescription, color = CurrentUiColor.素材项_文字颜色, modifier = Modifier.align(Alignment.CenterHorizontally))
+        }
+        if (targetByteArray == UiImageData::colorABackgroundImageData || targetByteArray == UiImageData::colorBBackgroundImageData) {
+            val targetColor: KMutableProperty0<ComputeBackgroundColor> = if (targetByteArray == UiImageData::colorABackgroundImageData) {
+                UiImageData::colorA
+            } else {
+                UiImageData::colorB
+            }
+            Column(modifier = Modifier.fillMaxHeight().width(IntrinsicSize.Max).background(uiColor.素材项_色彩提示_背景颜色)) {
+                Box(modifier = Modifier.fillMaxWidth().background(uiColor.素材项_色彩提示_标签_背景颜色).padding(5.dp)) {
+                    Text("背景颜色", color = uiColor.素材项_色彩提示_标签_文字颜色, fontSize = 12.sp)
+                }
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (targetColor.get() == ComputeBackgroundColor.RED) {
+                            uiColor.素材项_色彩选项_红色_选中_背景颜色
+                        } else {
+                            uiColor.素材项_色彩选项_红色_未选中_背景颜色
+                        }
+                    )
+                    .focusable()
+                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
+                    .clickable {
+                        targetColor.set(ComputeBackgroundColor.RED)
+                    }
+                    .padding(5.dp)
+                ) {
+                    Text("　红色  ", color = Color.White, fontSize = 12.sp)
+                }
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (targetColor.get() == ComputeBackgroundColor.GREEN) {
+                            uiColor.素材项_色彩选项_绿色_选中_背景颜色
+                        } else {
+                            uiColor.素材项_色彩选项_绿色_未选中_背景颜色
+                        }
+                    )
+                    .focusable()
+                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
+                    .clickable {
+                        targetColor.set(ComputeBackgroundColor.GREEN)
+                    }
+                    .padding(5.dp)
+                ) {
+                    Text("　绿色　", color = Color.Black, fontSize = 12.sp)
+                }
+                Box(modifier = Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (targetColor.get() == ComputeBackgroundColor.BLUE) {
+                            uiColor.素材项_色彩选项_蓝色_选中_背景颜色
+                        } else {
+                            uiColor.素材项_色彩选项_蓝色_未选中_背景颜色
+                        }
+                    )
+                    .focusable()
+                    .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
+                    .clickable {
+                        targetColor.set(ComputeBackgroundColor.BLUE)
+                    }
+                    .padding(5.dp)
+                ) {
+                    Text("　蓝色　", color = Color.White, fontSize = 12.sp)
+                }
             }
         }
-        Text(contentDescription, color = CurrentUiColor.素材项文字颜色, modifier = Modifier.align(Alignment.CenterHorizontally))
+
     }
+
 }
