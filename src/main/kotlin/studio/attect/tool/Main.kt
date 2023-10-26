@@ -10,10 +10,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Slider
-import androidx.compose.material.SliderDefaults
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
@@ -39,6 +36,7 @@ import java.awt.Cursor
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import java.io.File
+import java.io.FileInputStream
 import java.net.URI
 import kotlin.coroutines.CoroutineContext
 import kotlin.reflect.KMutableProperty0
@@ -120,8 +118,9 @@ fun main(args: Array<String>) = application {
         windowState.size = DpSize((screenSize.width * 0.6).dp, (screenSize.height * 0.6).dp)
     }
 
-//    UiImageData.whiteBackgroundImageData = FileInputStream(File("F:/cap/1_white.png")).readAllBytes()
-//    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/cap/1_black.png")).readAllBytes()
+    UiImageData.whiteBackgroundImageData = FileInputStream(File("F:/透明测试-白背景.png")).readAllBytes()
+    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/透明测试-黑背景.png")).readAllBytes()
+    UiImageData.colorABackgroundImageData = FileInputStream(File("F:/透明测试-绿背景.png")).readAllBytes()
 
     CurrentUiColor.init()
     Window(state = windowState, onCloseRequest = ::exitApplication, title = "差色背景去除工具") {
@@ -149,12 +148,11 @@ fun OptionPanel(modifier: Modifier = Modifier) {
     ) {
         DayNightModeSwitchButton()
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundOffset * 100)}", color = uiColor.配置面板_标签_文字颜色)
+            Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundTolerance * 100)}", color = uiColor.配置面板_标签_文字颜色)
             Slider(
-                value = UiImageData.colorBackgroundOffset,
+                value = UiImageData.colorBackgroundTolerance,
                 onValueChange = {
-                    UiImageData.colorBackgroundOffset = it
-                    println("value:$it ${(it * 100).toInt()}")
+                    UiImageData.colorBackgroundTolerance = it
                 },
                 onValueChangeFinished = {
                     println("value change finished")
@@ -165,6 +163,12 @@ fun OptionPanel(modifier: Modifier = Modifier) {
                     inactiveTrackColor = uiColor.配置面板_滑杆_无效条颜色,
                 )
             )
+        }
+
+        Button(onClick = {
+            UiImageData.compute()
+        }) {
+            Text("计算")
         }
 
     }
