@@ -24,6 +24,7 @@ interface UiColor {
 
     val 素材项_默认背景颜色: Color
     val 素材项_指向背景颜色: Color
+    val 素材项_阴影颜色: Color
     val 素材项_文字颜色: Color
     val 素材项_色彩提示_背景颜色: Color
     val 素材项_色彩提示_标签_背景颜色: Color
@@ -37,6 +38,7 @@ interface UiColor {
 
     val 配置面板_背景颜色: Color
     val 配置面板_标签_文字颜色: Color
+    val 配置面板_标签_可点击_文字颜色: Color
     val 配置面板_滑杆_手柄颜色: Color
     val 配置面板_滑杆_有效条颜色: Color
     val 配置面板_滑杆_无效条颜色: Color
@@ -60,6 +62,7 @@ object CurrentUiColor : UiColor {
     override var 素材区_滚动条激活颜色: Color by mutableStateOf(selectedColor.素材区_滚动条激活颜色)
     override var 素材项_默认背景颜色: Color by mutableStateOf(selectedColor.素材项_默认背景颜色)
     override var 素材项_指向背景颜色: Color by mutableStateOf(selectedColor.素材项_指向背景颜色)
+    override var 素材项_阴影颜色: Color by mutableStateOf(selectedColor.素材项_阴影颜色)
     override var 素材项_文字颜色: Color by mutableStateOf(selectedColor.素材项_文字颜色)
     override var 素材项_色彩提示_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩提示_背景颜色)
     override var 素材项_色彩提示_标签_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩提示_标签_背景颜色)
@@ -72,6 +75,7 @@ object CurrentUiColor : UiColor {
     override var 素材项_色彩选项_蓝色_选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_蓝色_选中_背景颜色)
     override var 配置面板_背景颜色: Color by mutableStateOf(selectedColor.配置面板_背景颜色)
     override var 配置面板_标签_文字颜色: Color by mutableStateOf(selectedColor.配置面板_标签_文字颜色)
+    override var 配置面板_标签_可点击_文字颜色: Color by mutableStateOf(selectedColor.配置面板_标签_可点击_文字颜色)
     override var 配置面板_滑杆_手柄颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_手柄颜色)
     override var 配置面板_滑杆_有效条颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_有效条颜色)
     override var 配置面板_滑杆_无效条颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_无效条颜色)
@@ -105,6 +109,9 @@ object CurrentUiColor : UiColor {
         }.value
         素材项_指向背景颜色 = transition.animateColor { state ->
             state.素材项_指向背景颜色
+        }.value
+        素材项_阴影颜色 = transition.animateColor { state ->
+            state.素材项_阴影颜色
         }.value
         素材项_文字颜色 = transition.animateColor { state ->
             state.素材项_文字颜色
@@ -142,6 +149,9 @@ object CurrentUiColor : UiColor {
         配置面板_标签_文字颜色 = transition.animateColor { state ->
             state.配置面板_标签_文字颜色
         }.value
+        配置面板_标签_可点击_文字颜色 = transition.animateColor { state ->
+            state.配置面板_标签_可点击_文字颜色
+        }.value
         配置面板_滑杆_手柄颜色 = transition.animateColor { state ->
             state.配置面板_滑杆_手柄颜色
         }.value
@@ -177,11 +187,12 @@ object LightUiColor : UiColor {
     override val 窗口_背景颜色: Color = Color.White
     override val 预览区_背景颜色: Color = 窗口_背景颜色
     override val 预览区_文字颜色: Color = Color(0xFF333333)
-    override val 素材区_背景颜色: Color = Color(0XFFF8F8F8)
+    override val 素材区_背景颜色: Color = Color(0xFFCCCCCC)
     override val 素材区_滚动条颜色: Color = Color.Black.copy(alpha = 0.5f)
     override val 素材区_滚动条激活颜色: Color = Color.Black.copy(alpha = 0.8f)
     override val 素材项_默认背景颜色: Color = Color(0xFFEEEEEE)
     override val 素材项_指向背景颜色: Color = Color(0xFFBBBBBB)
+    override val 素材项_阴影颜色: Color = Color(0xFF222222)
     override val 素材项_文字颜色: Color = Color(0xFF333333)
     override val 素材项_色彩提示_背景颜色: Color = Color(0xFFDDDDDD)
     override val 素材项_色彩提示_标签_背景颜色: Color = 素材项_色彩提示_背景颜色
@@ -196,11 +207,12 @@ object LightUiColor : UiColor {
 
     override val 配置面板_背景颜色: Color = Color(0xFFE7F8FF)
     override val 配置面板_标签_文字颜色: Color = 素材项_文字颜色
+    override val 配置面板_标签_可点击_文字颜色: Color = Color(0xFF0652C9)
     override val 配置面板_滑杆_手柄颜色 = Color(0xFFCF1B1B)
     override val 配置面板_滑杆_有效条颜色 = Color(0xFF1B93FF)
     override val 配置面板_滑杆_无效条颜色 = Color(0xFFB2D3FF)
 
-    override val 底部提示条_背景颜色: Color = Color(0xFFCCCCCC)
+    override val 底部提示条_背景颜色: Color = Color(0XFFF8F8F8)
     override val 底部提示条_文字颜色: Color = 素材项_文字颜色
 
     override val 分割线颜色: Color = Color.DarkGray
@@ -216,6 +228,7 @@ object DarkUiColor : UiColor {
     override val 素材区_滚动条激活颜色: Color = Color.White.copy(alpha = 0.8f)
     override val 素材项_默认背景颜色: Color = Color(0xFF222222)
     override val 素材项_指向背景颜色: Color = Color(0xFF555555)
+    override val 素材项_阴影颜色: Color = Color.Black
     override val 素材项_文字颜色: Color = Color(0xFFCCCCCC)
     override val 素材项_色彩提示_背景颜色: Color = Color(0xFF444444)
     override val 素材项_色彩提示_标签_背景颜色: Color = Color(0xFF444444)
@@ -230,6 +243,7 @@ object DarkUiColor : UiColor {
 
     override val 配置面板_背景颜色: Color = Color(0xFF1B2629)
     override val 配置面板_标签_文字颜色: Color = 素材项_文字颜色
+    override val 配置面板_标签_可点击_文字颜色: Color = Color(0xFF72A1EB)
     override val 配置面板_滑杆_手柄颜色 = Color(0xFFFF8585)
     override val 配置面板_滑杆_有效条颜色 = Color(0xFF8FD5FF)
     override val 配置面板_滑杆_无效条颜色 = Color(0xFF0B2EBD)

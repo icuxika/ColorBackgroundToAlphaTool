@@ -67,6 +67,11 @@ object UiImageData {
             field = value
         }
 
+    /**
+     * 黑白地图计算平衡
+     */
+    var whiteBlackBalance by mutableStateOf(0.5f)
+
 
     /**
      * 图片A应透明背景色
@@ -173,7 +178,7 @@ object UiImageData {
     }
 
     private fun compote3ImageMode() {
-        var currentColorBackgroundColor = RED
+        val currentColorBackgroundColor: ComputeBackgroundColor
 
         val colorBackgroundImage: ImageBitmap = if (colorABackgroundImage != null) {
             currentColorBackgroundColor = colorA
@@ -214,11 +219,14 @@ object UiImageData {
                 val alphaA = (255 - (alphaAValue.get(colorPixel) - alphaAValue(whitePixel)).absoluteValue)
                 val alphaB = (255 - (alphaBValue.get(colorPixel) - alphaBValue(whitePixel)).absoluteValue)
 
+                val whiteBalance = whiteBlackBalance
+                val blackBalance = 1 - whiteBalance
+
                 val pixel = ComputePixel(
-                    alpha = ((alphaA + alphaB) / 2),
-                    red = (whitePixel.red - (whitePixel.red - (whitePixel.red + blackPixel.red) / 2)),
-                    green = (whitePixel.green - (whitePixel.green - (whitePixel.green + blackPixel.green) / 2)),
-                    blue = (whitePixel.blue - (whitePixel.blue - (whitePixel.blue + blackPixel.blue) / 2)),
+                    alpha = ((alphaA * whiteBalance) + (alphaB * blackBalance)).toInt(),
+                    red = (whitePixel.red - (whitePixel.red - ((whitePixel.red * whiteBalance) + (blackPixel.red * blackBalance)))).toInt(),
+                    green = (whitePixel.green - (whitePixel.green - ((whitePixel.green * whiteBalance) + (blackPixel.green * blackBalance)))).toInt(),
+                    blue = (whitePixel.blue - (whitePixel.blue - ((whitePixel.blue * whiteBalance) + (blackPixel.blue * blackBalance)))).toInt(),
                 )
                 computeImage.setRGB(x, y, pixel.toInt())
             } else {

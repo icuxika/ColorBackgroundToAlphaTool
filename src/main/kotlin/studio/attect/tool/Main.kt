@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
@@ -32,6 +33,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.jetbrains.skiko.toImage
+import studio.attect.tool.ComputeBackgroundColor.*
 import java.awt.Cursor
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
@@ -148,14 +150,11 @@ fun OptionPanel(modifier: Modifier = Modifier) {
     ) {
         DayNightModeSwitchButton()
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
-            Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundTolerance * 100)}", color = uiColor.配置面板_标签_文字颜色)
+            Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundTolerance * 100)}", color = uiColor.配置面板_标签_文字颜色, fontSize = 14.sp)
             Slider(
                 value = UiImageData.colorBackgroundTolerance,
                 onValueChange = {
                     UiImageData.colorBackgroundTolerance = it
-                },
-                onValueChangeFinished = {
-                    println("value change finished")
                 },
                 colors = SliderDefaults.colors(
                     thumbColor = uiColor.配置面板_滑杆_手柄颜色,
@@ -164,7 +163,28 @@ fun OptionPanel(modifier: Modifier = Modifier) {
                 )
             )
         }
+        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+            Row {
+                Text("黑白底色平衡:${String.format("%.2f", UiImageData.whiteBlackBalance)}", color = uiColor.配置面板_标签_文字颜色, fontSize = 14.sp)
+                Text("重置", color = uiColor.配置面板_标签_可点击_文字颜色, fontSize = 12.sp, modifier = Modifier.align(Alignment.CenterVertically).clickable {
+                    UiImageData.whiteBlackBalance = 0.5f
+                })
+            }
+            Slider(
+                value = UiImageData.whiteBlackBalance,
+                onValueChange = {
+                    UiImageData.whiteBlackBalance = it
+                },
+                colors = SliderDefaults.colors(
+                    thumbColor = uiColor.配置面板_滑杆_手柄颜色,
+                    activeTrackColor = uiColor.配置面板_滑杆_有效条颜色,
+                    inactiveTrackColor = uiColor.配置面板_滑杆_无效条颜色,
+                )
+            )
+        }
+        Box(modifier = Modifier.padding(8.dp)) {
 
+        }
         Button(onClick = {
             UiImageData.compute()
         }) {
@@ -224,9 +244,6 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
             CurrentUiColor.素材项_默认背景颜色
         }
     }
-    val a = UiImageData::colorABackgroundImageData
-
-
     var hintText by remember { mutableStateOf(noImageText) }
     var showSelectFileDialog by remember { mutableStateOf(false) }
 
@@ -240,7 +257,8 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
     Row(
         modifier = modifier
             .fillMaxHeight()
-            .padding(5.dp)
+            .padding(8.dp)
+            .shadow(8.dp, shape = RoundedCornerShape(8.dp), spotColor = uiColor.素材项_阴影颜色)
             .clip(RoundedCornerShape(8.dp))
     ) {
         Column(
@@ -296,13 +314,45 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                 }
         ) {
             imageBitmap?.let {
-                Image(BitmapPainter(it), contentDescription, contentScale = ContentScale.Fit, modifier = Modifier.fillMaxWidth().weight(1f))
+                Image(
+                    BitmapPainter(it), contentDescription,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                        .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                        .background(
+                            when (targetByteArray) {
+                                UiImageData::whiteBackgroundImageData -> Color.White
+                                UiImageData::blackBackgroundImageData -> Color.Black
+                                UiImageData::colorABackgroundImageData -> {
+                                    when (UiImageData.colorA) {
+                                        RED -> Color.Red
+                                        GREEN -> Color.Green
+                                        BLUE -> Color.Blue
+                                    }
+                                }
+
+                                UiImageData::colorBBackgroundImageData -> {
+                                    when (UiImageData.colorB) {
+                                        RED -> Color.Red
+                                        GREEN -> Color.Green
+                                        BLUE -> Color.Blue
+                                    }
+                                }
+
+                                else -> Color.Transparent
+                            }
+                        )
+                )
             } ?: run {
                 Box(Modifier.fillMaxWidth().weight(1f)) {
                     Text(hintText, color = CurrentUiColor.素材项_文字颜色, modifier = Modifier.align(Alignment.Center), fontSize = 12.sp)
                 }
             }
-            Text(contentDescription, color = CurrentUiColor.素材项_文字颜色, modifier = Modifier.align(Alignment.CenterHorizontally))
+            Box(modifier = Modifier.align(Alignment.CenterHorizontally).padding(top = 4.dp, bottom = 4.dp)) {
+                Text(contentDescription, color = CurrentUiColor.素材项_文字颜色, fontSize = 12.sp)
+            }
         }
         if (targetByteArray == UiImageData::colorABackgroundImageData || targetByteArray == UiImageData::colorBBackgroundImageData) {
             val targetColor: KMutableProperty0<ComputeBackgroundColor> = if (targetByteArray == UiImageData::colorABackgroundImageData) {
@@ -317,7 +367,7 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        if (targetColor.get() == ComputeBackgroundColor.RED) {
+                        if (targetColor.get() == RED) {
                             uiColor.素材项_色彩选项_红色_选中_背景颜色
                         } else {
                             uiColor.素材项_色彩选项_红色_未选中_背景颜色
@@ -326,7 +376,7 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                     .focusable()
                     .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
                     .clickable {
-                        targetColor.set(ComputeBackgroundColor.RED)
+                        targetColor.set(RED)
                     }
                     .padding(5.dp)
                 ) {
@@ -335,7 +385,7 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        if (targetColor.get() == ComputeBackgroundColor.GREEN) {
+                        if (targetColor.get() == GREEN) {
                             uiColor.素材项_色彩选项_绿色_选中_背景颜色
                         } else {
                             uiColor.素材项_色彩选项_绿色_未选中_背景颜色
@@ -344,7 +394,7 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                     .focusable()
                     .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
                     .clickable {
-                        targetColor.set(ComputeBackgroundColor.GREEN)
+                        targetColor.set(GREEN)
                     }
                     .padding(5.dp)
                 ) {
@@ -353,7 +403,7 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                 Box(modifier = Modifier
                     .fillMaxWidth()
                     .background(
-                        if (targetColor.get() == ComputeBackgroundColor.BLUE) {
+                        if (targetColor.get() == BLUE) {
                             uiColor.素材项_色彩选项_蓝色_选中_背景颜色
                         } else {
                             uiColor.素材项_色彩选项_蓝色_未选中_背景颜色
@@ -362,7 +412,7 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                     .focusable()
                     .pointerHoverIcon(PointerIcon(Cursor(Cursor.HAND_CURSOR)))
                     .clickable {
-                        targetColor.set(ComputeBackgroundColor.BLUE)
+                        targetColor.set(BLUE)
                     }
                     .padding(5.dp)
                 ) {
