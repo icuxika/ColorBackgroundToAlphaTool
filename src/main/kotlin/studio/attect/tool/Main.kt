@@ -15,9 +15,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -83,10 +81,12 @@ fun App(frameWindowScope: FrameWindowScope) {
                 }
                 SlideOptionPanel(Modifier.align(Alignment.CenterEnd))
             }
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(uiColor.分割线颜色))
+            Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                 SourceItemPanel(frameWindowScope, modifier = Modifier.weight(1f))
-                ActionPanel()
+                ActionPanel(modifier = Modifier.fillMaxHeight())
             }
+            Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(uiColor.分割线颜色))
             Row(modifier = Modifier.fillMaxWidth().background(CurrentUiColor.底部提示条_背景颜色).padding(5.dp)) {
                 Text(globalHint, color = CurrentUiColor.底部提示条_文字颜色)
             }
@@ -153,7 +153,7 @@ fun SourceItemPanel(frameWindowScope: FrameWindowScope, modifier: Modifier = Mod
  */
 @Composable
 fun ActionPanel(modifier: Modifier = Modifier) {
-    Column(modifier.background(uiColor.窗口_背景颜色)) {
+    Column(modifier.background(uiColor.操作面板_背景颜色)) {
         DayNightModeSwitchButton(modifier = Modifier.align(Alignment.End))
         Column(modifier = Modifier.padding(16.dp)) {
             Button(onClick = {
@@ -246,25 +246,19 @@ fun VerticalText(
     }
 }
 
-/**
- * 选项面板
- */
 @Composable
-fun OptionPanel(modifier: Modifier = Modifier) {
-    Column(modifier
-        .background(uiColor.配置面板_背景颜色)
-        .focusable(true)
-        .drawBehind {
-            val borderSize = 1.dp.toPx();
-            drawLine(
-                color = uiColor.分割线颜色,
-                start = Offset(0f, size.height),
-                end = Offset(size.width, size.height),
-                strokeWidth = borderSize
-            )
-        }
-    ) {
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+fun TolerancePanel(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(8.dp, shape = RoundedCornerShape(8.dp))
+                .background(uiColor.配置面板_背景颜色)
+                .padding(8.dp)
+                .clip(
+                    RoundedCornerShape(8.dp)
+                )
+        ) {
             Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundTolerance * 100)}", color = uiColor.配置面板_标签_文字颜色, fontSize = 14.sp)
             Slider(
                 value = UiImageData.colorBackgroundTolerance,
@@ -278,7 +272,22 @@ fun OptionPanel(modifier: Modifier = Modifier) {
                 )
             )
         }
-        Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
+    }
+}
+
+@Composable
+fun WhiteBlackBalancePanel(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.padding(16.dp)) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(8.dp, shape = RoundedCornerShape(8.dp))
+                .background(uiColor.配置面板_背景颜色)
+                .padding(8.dp)
+                .clip(
+                    RoundedCornerShape(8.dp)
+                )
+        ) {
             Row {
                 Text("黑白底色平衡:${String.format("%.2f", UiImageData.whiteBlackBalance)}", color = uiColor.配置面板_标签_文字颜色, fontSize = 14.sp)
                 Text("重置", color = uiColor.配置面板_标签_可点击_文字颜色, fontSize = 12.sp, modifier = Modifier.align(Alignment.CenterVertically).clickable {
@@ -297,9 +306,20 @@ fun OptionPanel(modifier: Modifier = Modifier) {
                 )
             )
         }
-        Box(modifier = Modifier.padding(8.dp)) {
+    }
+}
 
-        }
+/**
+ * 选项面板
+ */
+@Composable
+fun OptionPanel(modifier: Modifier = Modifier) {
+    val scrollState = rememberScrollState()
+    Column(
+        modifier.verticalScroll(scrollState)
+    ) {
+        TolerancePanel()
+        WhiteBlackBalancePanel()
 
     }
 }

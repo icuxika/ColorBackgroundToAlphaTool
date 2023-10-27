@@ -45,6 +45,7 @@ interface UiColor {
     val 配置面板_滑杆_有效条颜色: Color
     val 配置面板_滑杆_无效条颜色: Color
 
+    val 操作面板_背景颜色: Color
 
     val 底部提示条_背景颜色: Color
     val 底部提示条_文字颜色: Color
@@ -83,6 +84,7 @@ object CurrentUiColor : UiColor {
     override var 配置面板_滑杆_手柄颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_手柄颜色)
     override var 配置面板_滑杆_有效条颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_有效条颜色)
     override var 配置面板_滑杆_无效条颜色: Color by mutableStateOf(selectedColor.配置面板_滑杆_无效条颜色)
+    override var 操作面板_背景颜色: Color by mutableStateOf(selectedColor.操作面板_背景颜色)
     override var 底部提示条_背景颜色: Color by mutableStateOf(selectedColor.底部提示条_背景颜色)
     override var 底部提示条_文字颜色: Color by mutableStateOf(selectedColor.底部提示条_文字颜色)
     override var 分割线颜色: Color by mutableStateOf(selectedColor.分割线颜色)
@@ -147,6 +149,7 @@ object CurrentUiColor : UiColor {
         素材项_色彩选项_蓝色_未选中_背景颜色 = transition.animateColor { state ->
             state.素材项_色彩选项_蓝色_未选中_背景颜色
         }.value
+
         配置面板_触发按钮_背景颜色 = transition.animateColor { state ->
             state.配置面板_触发按钮_背景颜色
         }.value
@@ -171,6 +174,11 @@ object CurrentUiColor : UiColor {
         配置面板_滑杆_无效条颜色 = transition.animateColor { state ->
             state.配置面板_滑杆_无效条颜色
         }.value
+
+        操作面板_背景颜色 = transition.animateColor { state ->
+            state.操作面板_背景颜色
+        }.value
+
         底部提示条_背景颜色 = transition.animateColor { state ->
             state.底部提示条_背景颜色
         }.value
@@ -217,17 +225,19 @@ object LightUiColor : UiColor {
 
     override val 配置面板_触发按钮_背景颜色: Color = Color.White
     override val 配置面板_触发按钮_文字颜色: Color = Color.Black
-    override val 配置面板_背景颜色: Color = Color(0xFFE7F8FF)
+    override val 配置面板_背景颜色: Color = Color.White
     override val 配置面板_标签_文字颜色: Color = 素材项_文字颜色
     override val 配置面板_标签_可点击_文字颜色: Color = Color(0xFF0652C9)
-    override val 配置面板_滑杆_手柄颜色 = Color(0xFFCF1B1B)
+    override val 配置面板_滑杆_手柄颜色 = Color(0xFFFF7274)
     override val 配置面板_滑杆_有效条颜色 = Color(0xFF1B93FF)
     override val 配置面板_滑杆_无效条颜色 = Color(0xFFB2D3FF)
+
+    override val 操作面板_背景颜色 = Color(0xFFF8F9FB)
 
     override val 底部提示条_背景颜色: Color = Color(0XFFF8F8F8)
     override val 底部提示条_文字颜色: Color = 素材项_文字颜色
 
-    override val 分割线颜色: Color = Color.DarkGray
+    override val 分割线颜色: Color = Color(0xFFEDEEF2)
 }
 
 @Suppress("NonAsciiCharacters")
@@ -262,9 +272,11 @@ object DarkUiColor : UiColor {
     override val 配置面板_滑杆_有效条颜色 = Color(0xFF8FD5FF)
     override val 配置面板_滑杆_无效条颜色 = Color(0xFF0B2EBD)
 
+    override val 操作面板_背景颜色 = Color(0xFF171717)
+
     override val 底部提示条_背景颜色: Color = Color(0xFF333333)
     override val 底部提示条_文字颜色: Color = 素材项_文字颜色
 
-    override val 分割线颜色: Color = Color.LightGray
+    override val 分割线颜色: Color = Color(0xFF1E1E1F)
 
 }
