@@ -3,6 +3,7 @@
 package studio.attect.tool
 
 import androidx.compose.animation.animateColor
+import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
@@ -25,7 +26,14 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.*
 import androidx.compose.ui.window.*
 import kotlinx.coroutines.CoroutineName
@@ -63,8 +71,8 @@ val fileDialogScope = object : CoroutineScope {
 fun App(frameWindowScope: FrameWindowScope) {
     MaterialTheme {
         Column(Modifier.fillMaxSize().background(CurrentUiColor.窗口_背景颜色)) {
-            Row(Modifier.fillMaxWidth().weight(1f).background(CurrentUiColor.预览区_背景颜色)) {
-                Box(modifier = Modifier.weight(1f).fillMaxHeight().width(IntrinsicSize.Max).height(IntrinsicSize.Max)) {
+            Box(Modifier.fillMaxWidth().weight(1f).background(CurrentUiColor.预览区_背景颜色)) {
+                Box(modifier = Modifier.fillMaxSize().width(IntrinsicSize.Max).height(IntrinsicSize.Max)) {
                     val currentImage = UiImageData.previewImage
                     if (currentImage == null) {
                         Text("请按底部提示提供素材", color = uiColor.预览区_文字颜色, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
@@ -73,31 +81,11 @@ fun App(frameWindowScope: FrameWindowScope) {
                     }
 
                 }
-                OptionPanel(Modifier.width(240.dp).fillMaxHeight())
-
+                SlideOptionPanel(Modifier.align(Alignment.CenterEnd))
             }
-            Box(modifier = Modifier.height(200.dp).background(CurrentUiColor.素材区_背景颜色)) {
-                val scrollState = rememberScrollState()
-                Row(modifier = Modifier.fillMaxSize().horizontalScroll(scrollState)) {
-                    SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.whiteBackgroundImage, contentDescription = "白色背景图片", noImageText = "点击添加白色背景图片", targetByteArray = UiImageData::whiteBackgroundImageData)
-                    SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.blackBackgroundImage, contentDescription = "黑色背景图片", noImageText = "点击添加黑色背景图片", targetByteArray = UiImageData::blackBackgroundImageData)
-                    SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.colorABackgroundImage, contentDescription = "纯色A背景图片", noImageText = "点击添加纯色A背景图片", targetByteArray = UiImageData::colorABackgroundImageData)
-                    SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.colorBBackgroundImage, contentDescription = "纯色B背景图片", noImageText = "点击添加纯色B背景图片", targetByteArray = UiImageData::colorBBackgroundImageData)
-                }
-                HorizontalScrollbar(
-                    modifier = Modifier.align(Alignment.BottomStart)
-                        .fillMaxWidth()
-                        .padding(end = 12.dp),
-                    adapter = rememberScrollbarAdapter(scrollState),
-                    style = ScrollbarStyle(
-                        minimalHeight = 16.dp,
-                        thickness = 8.dp,
-                        shape = RoundedCornerShape(4.dp),
-                        hoverDurationMillis = 300,
-                        unhoverColor = CurrentUiColor.素材区_滚动条颜色,
-                        hoverColor = CurrentUiColor.素材区_滚动条激活颜色
-                    )
-                )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                SourceItemPanel(frameWindowScope, modifier = Modifier.weight(1f))
+                ActionPanel()
             }
             Row(modifier = Modifier.fillMaxWidth().background(CurrentUiColor.底部提示条_背景颜色).padding(5.dp)) {
                 Text(globalHint, color = CurrentUiColor.底部提示条_文字颜色)
@@ -131,6 +119,134 @@ fun main(args: Array<String>) = application {
 }
 
 /**
+ * 素材面板
+ */
+@Composable
+fun SourceItemPanel(frameWindowScope: FrameWindowScope, modifier: Modifier = Modifier) {
+    Box(modifier = modifier.height(200.dp).background(CurrentUiColor.素材区_背景颜色)) {
+        val scrollState = rememberScrollState()
+        Row(modifier = Modifier.fillMaxSize().horizontalScroll(scrollState)) {
+            SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.whiteBackgroundImage, contentDescription = "白色背景图片", noImageText = "点击添加白色背景图片", targetByteArray = UiImageData::whiteBackgroundImageData)
+            SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.blackBackgroundImage, contentDescription = "黑色背景图片", noImageText = "点击添加黑色背景图片", targetByteArray = UiImageData::blackBackgroundImageData)
+            SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.colorABackgroundImage, contentDescription = "纯色A背景图片", noImageText = "点击添加纯色A背景图片", targetByteArray = UiImageData::colorABackgroundImageData)
+            SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.colorBBackgroundImage, contentDescription = "纯色B背景图片", noImageText = "点击添加纯色B背景图片", targetByteArray = UiImageData::colorBBackgroundImageData)
+        }
+        HorizontalScrollbar(
+            modifier = Modifier.align(Alignment.BottomStart)
+                .fillMaxWidth()
+                .padding(end = 12.dp),
+            adapter = rememberScrollbarAdapter(scrollState),
+            style = ScrollbarStyle(
+                minimalHeight = 16.dp,
+                thickness = 8.dp,
+                shape = RoundedCornerShape(4.dp),
+                hoverDurationMillis = 300,
+                unhoverColor = CurrentUiColor.素材区_滚动条颜色,
+                hoverColor = CurrentUiColor.素材区_滚动条激活颜色
+            )
+        )
+    }
+}
+
+/**
+ * 操作面板
+ */
+@Composable
+fun ActionPanel(modifier: Modifier = Modifier) {
+    Column(modifier.background(uiColor.窗口_背景颜色)) {
+        DayNightModeSwitchButton(modifier = Modifier.align(Alignment.End))
+        Column(modifier = Modifier.padding(16.dp)) {
+            Button(onClick = {
+                UiImageData.compute()
+            }) {
+                Text("计算")
+            }
+
+            Button(onClick = {
+
+            }) {
+                Text("保存")
+            }
+        }
+    }
+}
+
+@Composable
+fun SlideOptionPanel(modifier: Modifier = Modifier) {
+    var isShowing by remember { mutableStateOf(false) }
+    val transition = updateTransition(isShowing)
+    val offset by transition.animateDp {
+        if (it) {
+            0.dp
+        } else {
+            244.dp
+        }
+    }
+    Row(modifier.fillMaxHeight().offset(x = offset)) {
+        Box(modifier = Modifier
+            .align(Alignment.CenterVertically)
+            .shadow(8.dp, shape = RoundedCornerShape(8.dp))
+            .clip(RoundedCornerShape(8.dp))
+            .background(uiColor.配置面板_触发按钮_背景颜色)
+            .focusable(true)
+            .clickable { isShowing = !isShowing }
+        ) {
+            VerticalText("细节调整", Modifier.padding(8.dp), fontSize = 12.sp)
+        }
+        Box(Modifier.width(8.dp).height(8.dp)) {
+            //占位
+        }
+
+        OptionPanel(Modifier.width(240.dp).fillMaxHeight())
+    }
+}
+
+@Composable
+fun VerticalText(
+    text: String,
+    modifier: Modifier = Modifier,
+    color: Color = Color.Unspecified,
+    fontSize: TextUnit = TextUnit.Unspecified,
+    fontStyle: FontStyle? = null,
+    fontWeight: FontWeight? = null,
+    fontFamily: FontFamily? = null,
+    letterSpacing: TextUnit = TextUnit.Unspecified,
+    textDecoration: TextDecoration? = null,
+    textAlign: TextAlign? = null,
+    lineHeight: TextUnit = TextUnit.Unspecified,
+    overflow: TextOverflow = TextOverflow.Clip,
+    softWrap: Boolean = true,
+    maxLines: Int = Int.MAX_VALUE,
+    minLines: Int = 1,
+    onTextLayout: (TextLayoutResult) -> Unit = {},
+    style: TextStyle = LocalTextStyle.current
+) {
+    Column(modifier) {
+        text.forEach { character ->
+            Text(
+                text = character.toString(),
+                modifier = Modifier,
+                color = color,
+                fontSize = fontSize,
+                fontStyle = fontStyle,
+                fontWeight = fontWeight,
+                fontFamily = fontFamily,
+                letterSpacing = letterSpacing,
+                textDecoration = textDecoration,
+                textAlign = textAlign,
+                lineHeight = lineHeight,
+                overflow = overflow,
+                softWrap = softWrap,
+                maxLines = maxLines,
+                minLines = minLines,
+                onTextLayout = onTextLayout,
+                style = style
+            )
+        }
+    }
+}
+
+/**
  * 选项面板
  */
 @Composable
@@ -148,7 +264,6 @@ fun OptionPanel(modifier: Modifier = Modifier) {
             )
         }
     ) {
-        DayNightModeSwitchButton()
         Column(modifier = Modifier.fillMaxWidth().padding(8.dp)) {
             Text("容差 ${String.format("%.0f", UiImageData.colorBackgroundTolerance * 100)}", color = uiColor.配置面板_标签_文字颜色, fontSize = 14.sp)
             Slider(
@@ -185,11 +300,6 @@ fun OptionPanel(modifier: Modifier = Modifier) {
         Box(modifier = Modifier.padding(8.dp)) {
 
         }
-        Button(onClick = {
-            UiImageData.compute()
-        }) {
-            Text("计算")
-        }
 
     }
 }
@@ -209,7 +319,7 @@ fun DayNightModeSwitchButton(modifier: Modifier = Modifier) {
     } else {
         "切换到日间模式"
     }
-    Box(modifier = modifier.fillMaxWidth()) {
+    Box(modifier = modifier) {
         Box(modifier = Modifier
             .align(Alignment.CenterEnd)
             .width(32.dp)

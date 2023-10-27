@@ -36,6 +36,8 @@ interface UiColor {
     val 素材项_色彩选项_蓝色_未选中_背景颜色: Color
     val 素材项_色彩选项_蓝色_选中_背景颜色: Color
 
+    val 配置面板_触发按钮_背景颜色: Color
+    val 配置面板_触发按钮_文字颜色: Color
     val 配置面板_背景颜色: Color
     val 配置面板_标签_文字颜色: Color
     val 配置面板_标签_可点击_文字颜色: Color
@@ -73,6 +75,8 @@ object CurrentUiColor : UiColor {
     override var 素材项_色彩选项_绿色_选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_绿色_选中_背景颜色)
     override var 素材项_色彩选项_蓝色_未选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_蓝色_未选中_背景颜色)
     override var 素材项_色彩选项_蓝色_选中_背景颜色: Color by mutableStateOf(selectedColor.素材项_色彩选项_蓝色_选中_背景颜色)
+    override var 配置面板_触发按钮_背景颜色: Color by mutableStateOf(selectedColor.配置面板_触发按钮_背景颜色)
+    override var 配置面板_触发按钮_文字颜色: Color by mutableStateOf(selectedColor.配置面板_触发按钮_文字颜色)
     override var 配置面板_背景颜色: Color by mutableStateOf(selectedColor.配置面板_背景颜色)
     override var 配置面板_标签_文字颜色: Color by mutableStateOf(selectedColor.配置面板_标签_文字颜色)
     override var 配置面板_标签_可点击_文字颜色: Color by mutableStateOf(selectedColor.配置面板_标签_可点击_文字颜色)
@@ -143,6 +147,12 @@ object CurrentUiColor : UiColor {
         素材项_色彩选项_蓝色_未选中_背景颜色 = transition.animateColor { state ->
             state.素材项_色彩选项_蓝色_未选中_背景颜色
         }.value
+        配置面板_触发按钮_背景颜色 = transition.animateColor { state ->
+            state.配置面板_触发按钮_背景颜色
+        }.value
+        配置面板_触发按钮_文字颜色 = transition.animateColor { state ->
+            state.配置面板_触发按钮_文字颜色
+        }.value
         配置面板_背景颜色 = transition.animateColor { state ->
             state.配置面板_背景颜色
         }.value
@@ -205,6 +215,8 @@ object LightUiColor : UiColor {
     override val 素材项_色彩选项_蓝色_选中_背景颜色: Color = Color.Blue
     override val 素材项_色彩选项_蓝色_未选中_背景颜色: Color = 素材项_色彩选项_蓝色_选中_背景颜色.copy(0.2f)
 
+    override val 配置面板_触发按钮_背景颜色: Color = Color.White
+    override val 配置面板_触发按钮_文字颜色: Color = Color.Black
     override val 配置面板_背景颜色: Color = Color(0xFFE7F8FF)
     override val 配置面板_标签_文字颜色: Color = 素材项_文字颜色
     override val 配置面板_标签_可点击_文字颜色: Color = Color(0xFF0652C9)
@@ -241,6 +253,8 @@ object DarkUiColor : UiColor {
     override val 素材项_色彩选项_蓝色_选中_背景颜色: Color = Color.Blue
     override val 素材项_色彩选项_蓝色_未选中_背景颜色: Color = 素材项_色彩选项_蓝色_选中_背景颜色.copy(0.2f)
 
+    override val 配置面板_触发按钮_背景颜色: Color = Color(0xFFCCCCCC)
+    override val 配置面板_触发按钮_文字颜色: Color = Color.White
     override val 配置面板_背景颜色: Color = Color(0xFF1B2629)
     override val 配置面板_标签_文字颜色: Color = 素材项_文字颜色
     override val 配置面板_标签_可点击_文字颜色: Color = Color(0xFF72A1EB)
