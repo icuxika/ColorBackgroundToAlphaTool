@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateDp
 import androidx.compose.animation.core.updateTransition
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.onDrag
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsHoveredAsState
 import androidx.compose.foundation.layout.*
@@ -15,13 +16,13 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.toAwtImage
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.input.pointer.*
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
@@ -64,6 +65,7 @@ val fileDialogScope = object : CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Default + CoroutineName("文件选择器")
 }
 
+@OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
 @Composable
 @Preview
 fun App(frameWindowScope: FrameWindowScope) {
@@ -75,7 +77,37 @@ fun App(frameWindowScope: FrameWindowScope) {
                     if (currentImage == null) {
                         Text("请按底部提示提供素材", color = uiColor.预览区_文字颜色, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
                     } else {
-                        Image(currentImage, contentDescription = "预览图片", modifier = Modifier.fillMaxSize())
+
+                        Box(modifier = Modifier
+                            .fillMaxSize()
+                            .onDrag { offset ->
+                                UiImageData.previewImageOffsetX += offset.x
+                                UiImageData.previewImageOffsetY += offset.y
+                            }
+                            .onPointerEvent(PointerEventType.Release) {
+                                it.button?.let { pointerButton ->
+                                    if (pointerButton == PointerButton.Tertiary) {
+                                        UiImageData.resetPreview()
+                                    }
+                                }
+                            }
+                            .onPointerEvent(PointerEventType.Scroll) {
+                                it.changes.firstOrNull()?.scrollDelta?.y?.let { y ->
+                                    if (y < 0 && UiImageData.previewImageScale < 5f) {
+                                        UiImageData.previewImageScale += 0.05f
+                                    } else if (y > 0 && UiImageData.previewImageScale > 0.05f) {
+                                        UiImageData.previewImageScale -= 0.05f
+                                    }
+                                }
+                            }
+                        ) {
+                            Image(currentImage, contentDescription = "预览图片", contentScale = ContentScale.None, modifier = Modifier
+                                .fillMaxSize()
+                                .scale(UiImageData.previewImageScale)
+                                .offset { IntOffset(UiImageData.previewImageOffsetX.toInt(), UiImageData.previewImageOffsetY.toInt()) }
+                            )
+                        }
+
                     }
 
                 }

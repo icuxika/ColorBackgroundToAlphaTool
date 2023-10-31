@@ -37,6 +37,21 @@ object UiImageData {
         }
 
     /**
+     * 预览图片缩放
+     */
+    var previewImageScale by mutableStateOf(1f)
+
+    /**
+     * 预览图片显示横轴偏移
+     */
+    var previewImageOffsetX by mutableStateOf(0f)
+
+    /**
+     * 预览图片显示纵轴偏移
+     */
+    var previewImageOffsetY by mutableStateOf(0f)
+
+    /**
      * 用于显示的黑色背景图片
      */
     var blackBackgroundImage by mutableStateOf<ImageBitmap?>(null)
@@ -167,6 +182,15 @@ object UiImageData {
         return true
     }
 
+    /**
+     * 重置预览图片的相关参数
+     */
+    fun resetPreview() {
+        previewImageScale = 1f
+        previewImageOffsetX = 0f
+        previewImageOffsetY = 0f
+    }
+
     fun compute() {
         if (!checkBeforeCompute()) return
         //todo 多核优化
@@ -237,6 +261,7 @@ object UiImageData {
         val outputStream = ByteArrayOutputStream()
         ImageIO.write(computeImage, "png", outputStream)
         previewImageData = outputStream.toByteArray()
+        resetPreview()
     }
 
     private fun foreach3ImageBitmap(imageBitmapA: ImageBitmap, imageBitmapB: ImageBitmap, imageBitmapC: ImageBitmap, block: (x: Int, y: Int, pixelA: ComputePixel, pixelB: ComputePixel, pixelC: ComputePixel) -> Unit) {
