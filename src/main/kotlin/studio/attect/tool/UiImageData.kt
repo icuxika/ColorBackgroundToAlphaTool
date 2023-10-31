@@ -28,7 +28,7 @@ object UiImageData {
      */
     var previewImageData = ByteArray(0)
         set(value) {
-            previewImage = if (value.size == 0) {
+            previewImage = if (value.isEmpty()) {
                 null
             } else {
                 loadImageBitmap(ByteArrayInputStream(value))
@@ -50,6 +50,15 @@ object UiImageData {
      * 预览图片显示纵轴偏移
      */
     var previewImageOffsetY by mutableStateOf(0f)
+
+    /**
+     * 预览图片显示旋转角度
+     */
+    var previewImageRotate by mutableStateOf(0f)
+
+    var previewMouseRotationLock = false
+
+    var previewMouseRotationStartX = Float.MIN_VALUE
 
     /**
      * 用于显示的黑色背景图片
@@ -189,6 +198,7 @@ object UiImageData {
         previewImageScale = 1f
         previewImageOffsetX = 0f
         previewImageOffsetY = 0f
+        previewImageRotate = 0f
     }
 
     fun compute() {

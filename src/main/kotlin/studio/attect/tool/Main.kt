@@ -16,6 +16,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -77,17 +78,35 @@ fun App(frameWindowScope: FrameWindowScope) {
                     if (currentImage == null) {
                         Text("请按底部提示提供素材", color = uiColor.预览区_文字颜色, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
                     } else {
-
                         Box(modifier = Modifier
                             .fillMaxSize()
                             .onDrag { offset ->
                                 UiImageData.previewImageOffsetX += offset.x
                                 UiImageData.previewImageOffsetY += offset.y
                             }
+                            .onPointerEvent(PointerEventType.Move) {
+                                if (UiImageData.previewMouseRotationLock) {
+                                    if (UiImageData.previewMouseRotationStartX != Float.MIN_VALUE) {
+                                        UiImageData.previewImageRotate += UiImageData.previewMouseRotationStartX - it.changes.first().position.x
+                                    }
+
+                                    UiImageData.previewMouseRotationStartX = it.changes.first().position.x
+                                }
+                            }
+                            .onPointerEvent(PointerEventType.Press) {
+                                it.button?.let { pointerButton ->
+                                    if (pointerButton == PointerButton.Secondary) {
+                                        UiImageData.previewMouseRotationLock = true
+                                        UiImageData.previewMouseRotationStartX = Float.MIN_VALUE
+                                    }
+                                }
+                            }
                             .onPointerEvent(PointerEventType.Release) {
                                 it.button?.let { pointerButton ->
                                     if (pointerButton == PointerButton.Tertiary) {
                                         UiImageData.resetPreview()
+                                    } else if (pointerButton == PointerButton.Secondary) {
+                                        UiImageData.previewMouseRotationLock = false
                                     }
                                 }
                             }
@@ -101,11 +120,18 @@ fun App(frameWindowScope: FrameWindowScope) {
                                 }
                             }
                         ) {
-                            Image(currentImage, contentDescription = "预览图片", contentScale = ContentScale.None, modifier = Modifier
-                                .fillMaxSize()
+                            Box(modifier = Modifier.fillMaxSize()
                                 .scale(UiImageData.previewImageScale)
-                                .offset { IntOffset(UiImageData.previewImageOffsetX.toInt(), UiImageData.previewImageOffsetY.toInt()) }
-                            )
+                                .offset {
+                                    IntOffset(UiImageData.previewImageOffsetX.toInt(), UiImageData.previewImageOffsetY.toInt())
+                                }) {
+
+                                Image(
+                                    currentImage, contentDescription = "预览图片", contentScale = ContentScale.None, modifier = Modifier
+                                        .fillMaxSize()
+                                        .rotate(UiImageData.previewImageRotate)
+                                )
+                            }
                         }
 
                     }
