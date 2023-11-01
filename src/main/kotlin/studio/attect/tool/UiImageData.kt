@@ -11,6 +11,8 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
+import kotlin.math.ceil
+import kotlin.system.measureNanoTime
 
 /**
  * 显示在UI上的图片数据
@@ -287,16 +289,56 @@ object UiImageData {
         imageBitmapB.readPixels(bufferB, 0, 0, width, height)
         imageBitmapC.readPixels(bufferC, 0, 0, width, height)
 
-        repeat(height) { y ->
-            repeat(width) { x ->
-                val position = x + (y * width)
-                val pixelA = ComputePixel(bufferA[position])
-                val pixelB = ComputePixel(bufferB[position])
-                val pixelC = ComputePixel(bufferC[position])
+        val cores = Runtime.getRuntime().availableProcessors()
+        val childCount = ceil(height.toDouble() / cores).toInt()
+//        measureNanoTime {
+//            runBlocking {
+//                repeat(cores){processorIndex->
+//                    launch {
+//                        for (y in processorIndex*childCount until (processorIndex+1)*childCount){
+//                            repeat(width){x->
+//                                val position = x + (y * width)
+//                                val pixelA = ComputePixel(bufferA[position])
+//                                val pixelB = ComputePixel(bufferB[position])
+//                                val pixelC = ComputePixel(bufferC[position])
+//
+//                                block(x, y, pixelA, pixelB, pixelC)
+//                            }
+//                        }
+//                    }
+//                }
+//            }
+//        }.also { println("多协程时间:$it") }
+//
+//        measureNanoTime {
+//            ImageWorker.commitJob { processorIndex->
+//                for (y in processorIndex*childCount until (processorIndex+1)*childCount){
+//                    repeat(width){x->
+//                        val position = x + (y * width)
+//                        val pixelA = ComputePixel(bufferA[position])
+//                        val pixelB = ComputePixel(bufferB[position])
+//                        val pixelC = ComputePixel(bufferC[position])
+//
+//                        block(x, y, pixelA, pixelB, pixelC)
+//                    }
+//                }
+//            }
+//        }.also { println("线程池时间:$it") }
 
-                block(x, y, pixelA, pixelB, pixelC)
+
+        measureNanoTime {
+            repeat(height) { y ->
+                repeat(width) { x ->
+                    val position = x + (y * width)
+                    val pixelA = ComputePixel(bufferA[position])
+                    val pixelB = ComputePixel(bufferB[position])
+                    val pixelC = ComputePixel(bufferC[position])
+
+                    block(x, y, pixelA, pixelB, pixelC)
+                }
             }
-        }
+        }.also { println("单线程时间:$it") }
+
     }
 
     private fun compute4ImageBitmap() {

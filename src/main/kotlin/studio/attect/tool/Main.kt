@@ -96,7 +96,6 @@ fun App(frameWindowScope: FrameWindowScope) {
                                         }
                                     }
                                 }
-
                             }
                             .onPointerEvent(PointerEventType.Move) {
                                 if (UiImageData.previewMouseRotationLock) {
@@ -169,6 +168,7 @@ fun App(frameWindowScope: FrameWindowScope) {
 lateinit var windowState: WindowState
 fun main(args: Array<String>) = application {
     noImageFileSizeLimit = args.contains("--no-image-file-size-limit")
+    ImageWorker
 
     windowState = rememberWindowState()
     val screenSize = Toolkit.getDefaultToolkit().screenSize
