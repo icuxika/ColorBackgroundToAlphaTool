@@ -15,10 +15,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.*
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.draw.scale
-import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.draw.*
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.painter.BitmapPainter
@@ -49,6 +48,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.net.URI
 import kotlin.coroutines.CoroutineContext
+import kotlin.math.ceil
 import kotlin.reflect.KMutableProperty0
 
 
@@ -83,6 +83,20 @@ fun App(frameWindowScope: FrameWindowScope) {
                             .onDrag { offset ->
                                 UiImageData.previewImageOffsetX += offset.x
                                 UiImageData.previewImageOffsetY += offset.y
+                            }
+                            .drawBehind {
+                                val xCount = ceil(size.width / 10).toInt()
+                                val yCount = ceil(size.height / 10).toInt()
+                                repeat(yCount) { y ->
+                                    repeat(xCount) { x ->
+                                        if ((x + y) % 2 == 0) {
+                                            drawRect(uiColor.预览区_格子图_差色, Offset((x * 10).toFloat(), (y * 10).toFloat()), Size(10f, 10f))
+                                        } else {
+                                            drawRect(uiColor.预览区_格子图_底色, Offset((x * 10).toFloat(), (y * 10).toFloat()), Size(10f, 10f))
+                                        }
+                                    }
+                                }
+
                             }
                             .onPointerEvent(PointerEventType.Move) {
                                 if (UiImageData.previewMouseRotationLock) {
