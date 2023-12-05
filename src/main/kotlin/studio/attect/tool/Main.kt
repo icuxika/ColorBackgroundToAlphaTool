@@ -168,7 +168,6 @@ fun App(frameWindowScope: FrameWindowScope) {
 lateinit var windowState: WindowState
 fun main(args: Array<String>) = application {
     noImageFileSizeLimit = args.contains("--no-image-file-size-limit")
-    ImageWorker
 
     windowState = rememberWindowState()
     val screenSize = Toolkit.getDefaultToolkit().screenSize
@@ -181,7 +180,7 @@ fun main(args: Array<String>) = application {
     }
 
     UiImageData.whiteBackgroundImageData = FileInputStream(File("F:/透明测试-白背景.png")).readAllBytes()
-    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/透明测试-黑背景.png")).readAllBytes()
+//    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/透明测试-黑背景.png")).readAllBytes()
     UiImageData.colorABackgroundImageData = FileInputStream(File("F:/透明测试-绿背景.png")).readAllBytes()
 
     CurrentUiColor.init()

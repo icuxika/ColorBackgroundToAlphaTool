@@ -34,6 +34,9 @@ class ComputePixel {
 
     constructor(red: Int, green: Int, blue: Int) : this(255, red, green, blue)
 
+    /**
+     * 计算给定的两个颜色是否相差在指定范围内
+     */
     fun isWithinTolerance(other: ComputePixel, otherBackgroundColor: ComputeBackgroundColor, tolerance: Int): Boolean {
         val diff = when (otherBackgroundColor) {
             RED -> abs(this.red - other.red)

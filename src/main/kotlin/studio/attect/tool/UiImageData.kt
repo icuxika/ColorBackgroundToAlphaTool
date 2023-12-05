@@ -11,8 +11,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import javax.imageio.ImageIO
 import kotlin.math.absoluteValue
-import kotlin.math.ceil
-import kotlin.system.measureNanoTime
 
 /**
  * 显示在UI上的图片数据
@@ -149,12 +147,8 @@ object UiImageData {
      * 计算前的数据检查
      */
     private fun checkBeforeCompute(): Boolean {
-        if (whiteBackgroundImageData.isEmpty()) {
-            globalHint = "请提供白色背景图片"
-            return false
-        }
-        if (blackBackgroundImageData.isEmpty()) {
-            globalHint = "请提供黑色背景图片"
+        if (whiteBackgroundImageData.isEmpty() && blackBackgroundImageData.isEmpty()) {
+            globalHint = "请至少提供白色或黑色背景的图片"
             return false
         }
         if (colorABackgroundImageData.isEmpty() && colorBBackgroundImageData.isEmpty()) {
@@ -162,8 +156,8 @@ object UiImageData {
             return false
         }
 
-        val currentWhiteBackgroundImage = whiteBackgroundImage ?: return false
-        val currentBlackBackgroundImage = blackBackgroundImage ?: return false
+        val currentWhiteBackgroundImage = whiteBackgroundImage
+        val currentBlackBackgroundImage = blackBackgroundImage
         val currentColorABackgroundImage = colorABackgroundImage
         val currentColorBBackgroundImage = colorBBackgroundImage
 
@@ -172,21 +166,36 @@ object UiImageData {
             return false
         }
 
-        if (!currentWhiteBackgroundImage.compareSize(currentBlackBackgroundImage)) {
+        if (currentBlackBackgroundImage != null && currentWhiteBackgroundImage != null && !currentWhiteBackgroundImage.compareSize(currentBlackBackgroundImage)) {
             globalHint = "黑白底色的两张图片尺寸不一致，无法处理"
             return false
         }
 
         if (currentColorABackgroundImage != null) {
-            if (!currentColorABackgroundImage.compareSize(currentWhiteBackgroundImage)) {
-                globalHint = "有色背景（${colorA}）图片与其它图片尺寸不一致，无法处理"
-                return false
+            if (currentWhiteBackgroundImage != null) {
+                if (!currentColorABackgroundImage.compareSize(currentWhiteBackgroundImage)) {
+                    globalHint = "有色背景（${colorA}）图片与白色背景图片尺寸不一致，无法处理"
+                    return false
+                }
+            }
+            if (currentBlackBackgroundImage != null) {
+                if (!currentColorABackgroundImage.compareSize(currentBlackBackgroundImage)) {
+                    globalHint = "有色背景（${colorA}）图片与黑色背景图片尺寸不一致，无法处理"
+                    return false
+                }
             }
         }
 
         if (currentColorBBackgroundImage != null) {
-            if (!currentColorBBackgroundImage.compareSize(currentWhiteBackgroundImage)) {
-                globalHint = "有色背景（${colorB}）图片与其它图片尺寸不一致，无法处理"
+            if (currentWhiteBackgroundImage != null) {
+                if (!currentColorBBackgroundImage.compareSize(currentWhiteBackgroundImage)) {
+                    globalHint = "有色背景（${colorB}）图片与白色背景图片尺寸不一致，无法处理"
+                }
+            }
+            if (currentBlackBackgroundImage != null) {
+                if (!currentColorBBackgroundImage.compareSize(currentBlackBackgroundImage)) {
+                    globalHint = "有色背景（${colorB}）图片与黑色背景图片尺寸不一致，无法处理"
+                }
             }
         }
 
@@ -205,15 +214,73 @@ object UiImageData {
 
     fun compute() {
         if (!checkBeforeCompute()) return
-        //todo 多核优化
-        if (colorABackgroundImage == null || colorBBackgroundImage == null) {
+        if (((whiteBackgroundImage == null && blackBackgroundImage != null) || (whiteBackgroundImage != null && blackBackgroundImage == null))
+            &&
+            ((colorABackgroundImage == null && colorBBackgroundImage != null) || (colorABackgroundImage != null && colorBBackgroundImage == null))
+        ) {
+            compute2ImageMode()
+        } else if (colorABackgroundImage == null || colorBBackgroundImage == null) {
             compote3ImageMode()
         } else if (colorABackgroundImage != null && colorBBackgroundImage != null) {
             compute4ImageBitmap()
         }
     }
 
+    private fun compute2ImageMode() {
+        println("compute2ImageMode")
+        val currentColorBackgroundColor: ComputeBackgroundColor
+
+        val colorBackgroundImage: ImageBitmap = if (colorABackgroundImage != null) {
+            currentColorBackgroundColor = colorA
+            colorABackgroundImage ?: throw IllegalStateException("colorABackgroundImage为null，存在其它线程修改了值？")
+        } else if (colorBBackgroundImage != null) {
+            currentColorBackgroundColor = colorB
+            colorBBackgroundImage ?: throw IllegalStateException("colorBBackgroundImage为null，存在其它线程修改了值？")
+        } else {
+            throw IllegalStateException("有色图片数据均为null")
+        }
+
+        val sourceBackgroundImage = whiteBackgroundImage ?: blackBackgroundImage ?: throw IllegalStateException("whiteBackgroundImage 和 whiteBackgroundImage 均为null，存在其它线程修改了值？")
+
+        val tolerance = (colorBackgroundTolerance * 100).toInt()
+        val fullTransparentColor = ComputePixel(0, 0, 0, 0).toInt()
+
+        val computeImage = BufferedImage(colorBackgroundImage.width, colorBackgroundImage.height, BufferedImage.TYPE_INT_ARGB)
+
+        foreach2ImageBitmap(sourceBackgroundImage, colorBackgroundImage) { x, y, sourcePixel, colorPixel ->
+            if (colorPixel.alpha == 255 && colorPixel.isWithinTolerance(currentColorBackgroundColor, tolerance)) {
+                computeImage.setRGB(x, y, fullTransparentColor)
+            } else if (colorPixel == sourcePixel) {
+                computeImage.setRGB(x, y, sourcePixel.toInt())
+            } else if (colorPixel.isWithinTolerance(sourcePixel, currentColorBackgroundColor, tolerance)) {
+                val alphaValue = when (currentColorBackgroundColor) {
+                    RED -> ComputePixel::blue
+                    GREEN -> ComputePixel::red
+                    BLUE -> ComputePixel::green
+                }
+
+                val alpha = (255 - (alphaValue.get(colorPixel) - alphaValue(sourcePixel)).absoluteValue)
+
+                val pixel = ComputePixel(
+                    alpha = alpha,
+                    red = sourcePixel.red,
+                    green = sourcePixel.green,
+                    blue = sourcePixel.blue,
+                )
+                computeImage.setRGB(x, y, pixel.toInt())
+            } else {
+                computeImage.setRGB(x, y, sourcePixel.toInt())
+            }
+        }
+
+        val outputStream = ByteArrayOutputStream()
+        ImageIO.write(computeImage, "png", outputStream)
+        previewImageData = outputStream.toByteArray()
+        resetPreview()
+    }
+
     private fun compote3ImageMode() {
+        println("compute3ImageMode")
         val currentColorBackgroundColor: ComputeBackgroundColor
 
         val colorBackgroundImage: ImageBitmap = if (colorABackgroundImage != null) {
@@ -289,59 +356,44 @@ object UiImageData {
         imageBitmapB.readPixels(bufferB, 0, 0, width, height)
         imageBitmapC.readPixels(bufferC, 0, 0, width, height)
 
-        val cores = Runtime.getRuntime().availableProcessors()
-        val childCount = ceil(height.toDouble() / cores).toInt()
-//        measureNanoTime {
-//            runBlocking {
-//                repeat(cores){processorIndex->
-//                    launch {
-//                        for (y in processorIndex*childCount until (processorIndex+1)*childCount){
-//                            repeat(width){x->
-//                                val position = x + (y * width)
-//                                val pixelA = ComputePixel(bufferA[position])
-//                                val pixelB = ComputePixel(bufferB[position])
-//                                val pixelC = ComputePixel(bufferC[position])
-//
-//                                block(x, y, pixelA, pixelB, pixelC)
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }.also { println("多协程时间:$it") }
-//
-//        measureNanoTime {
-//            ImageWorker.commitJob { processorIndex->
-//                for (y in processorIndex*childCount until (processorIndex+1)*childCount){
-//                    repeat(width){x->
-//                        val position = x + (y * width)
-//                        val pixelA = ComputePixel(bufferA[position])
-//                        val pixelB = ComputePixel(bufferB[position])
-//                        val pixelC = ComputePixel(bufferC[position])
-//
-//                        block(x, y, pixelA, pixelB, pixelC)
-//                    }
-//                }
-//            }
-//        }.also { println("线程池时间:$it") }
+        repeat(height) { y ->
+            repeat(width) { x ->
+                val position = x + (y * width)
+                val pixelA = ComputePixel(bufferA[position])
+                val pixelB = ComputePixel(bufferB[position])
+                val pixelC = ComputePixel(bufferC[position])
 
-
-        measureNanoTime {
-            repeat(height) { y ->
-                repeat(width) { x ->
-                    val position = x + (y * width)
-                    val pixelA = ComputePixel(bufferA[position])
-                    val pixelB = ComputePixel(bufferB[position])
-                    val pixelC = ComputePixel(bufferC[position])
-
-                    block(x, y, pixelA, pixelB, pixelC)
-                }
+                block(x, y, pixelA, pixelB, pixelC)
             }
-        }.also { println("单线程时间:$it") }
+        }
+
+    }
+
+    private fun foreach2ImageBitmap(imageBitmapA: ImageBitmap, imageBitmapB: ImageBitmap, block: (x: Int, y: Int, pixelA: ComputePixel, pixelB: ComputePixel) -> Unit) {
+        val width = imageBitmapA.width
+        val height = imageBitmapA.height
+
+        val bufferSize = width * height
+        val bufferA = IntArray(bufferSize)
+        val bufferB = IntArray(bufferSize)
+
+        imageBitmapA.readPixels(bufferA, 0, 0, width, height)
+        imageBitmapB.readPixels(bufferB, 0, 0, width, height)
+
+        repeat(height) { y ->
+            repeat(width) { x ->
+                val position = x + (y * width)
+                val pixelA = ComputePixel(bufferA[position])
+                val pixelB = ComputePixel(bufferB[position])
+
+                block(x, y, pixelA, pixelB)
+            }
+        }
 
     }
 
     private fun compute4ImageBitmap() {
+        println("compute4ImageMode")
         //todo
     }
 }
