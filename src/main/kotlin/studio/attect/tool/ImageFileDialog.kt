@@ -3,16 +3,23 @@ package studio.attect.tool
 import java.awt.FileDialog
 import java.awt.Frame
 import java.io.File
+import java.io.FileOutputStream
 import kotlin.reflect.KMutableProperty0
 
 /**
  * 选择图片对话框<br>
  * 用于选择单张图片，不限制扩展名
  */
-class ImageFileDialog(parent: Frame, val imageItemName: String, val onVisibleChange: (Boolean) -> Unit,val targetByteArray:KMutableProperty0<ByteArray>) : FileDialog(parent, imageItemName, LOAD) {
+class ImageFileDialog(parent: Frame, val isSave: Boolean = false, val imageItemName: String, val onVisibleChange: (Boolean) -> Unit, val targetByteArray: KMutableProperty0<ByteArray>) : FileDialog(parent, imageItemName, LOAD) {
 
     init {
         isMultipleMode = false
+        if (isSave) {
+            mode = SAVE
+            file = "图片.png"
+        } else {
+            mode = LOAD
+        }
     }
 
     override fun setVisible(b: Boolean) {
@@ -27,8 +34,26 @@ class ImageFileDialog(parent: Frame, val imageItemName: String, val onVisibleCha
         super.dispose()
         directory?.let { dir ->
             file?.let { filename ->
-                val file = File(dir + filename)
-                file.tryLoadToStock(imageItemName,"选择", targetByteArray )
+                if (isSave) {
+                    var saveName = filename
+                    saveName = saveName.substringBeforeLast(".") + ".png"
+                    val file = File(dir + saveName)
+                    val result = runCatching {
+                        val fileOutputStream = FileOutputStream(file)
+                        fileOutputStream.write(targetByteArray.get())
+                        fileOutputStream.flush()
+                        fileOutputStream.close()
+                    }
+                    globalHint = if (result.isSuccess) {
+                        "成功保存计算结果到：" + file.absolutePath
+                    } else {
+                        "保存失败，请选择其它位置或文件名"
+                    }
+
+                } else {
+                    val file = File(dir + filename)
+                    file.tryLoadToStock(imageItemName, "选择", targetByteArray)
+                }
             }
         }
     }

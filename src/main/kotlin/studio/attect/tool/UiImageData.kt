@@ -319,8 +319,8 @@ object UiImageData {
                     BLUE -> ComputePixel::red
                 }
 
-                val alphaA = (255 - (alphaAValue.get(colorPixel) - alphaAValue(whitePixel)).absoluteValue)
-                val alphaB = (255 - (alphaBValue.get(colorPixel) - alphaBValue(whitePixel)).absoluteValue)
+                val alphaA = (255 - (alphaAValue(colorPixel) - alphaAValue(whitePixel)).absoluteValue)
+                val alphaB = (255 - (alphaBValue(colorPixel) - alphaBValue(whitePixel)).absoluteValue)
 
                 val whiteBalance = whiteBlackBalance
                 val blackBalance = 1 - whiteBalance
@@ -343,7 +343,114 @@ object UiImageData {
         resetPreview()
     }
 
-    private fun foreach3ImageBitmap(imageBitmapA: ImageBitmap, imageBitmapB: ImageBitmap, imageBitmapC: ImageBitmap, block: (x: Int, y: Int, pixelA: ComputePixel, pixelB: ComputePixel, pixelC: ComputePixel) -> Unit) {
+
+    private fun compute4ImageBitmap() {
+        println("compute4ImageMode")
+        val currentWhiteBackgroundImage = whiteBackgroundImage ?: throw IllegalStateException("whiteBackgroundImage为null，存在其它线程修改了值？")
+        val currentBlackBackgroundImage = blackBackgroundImage ?: throw IllegalStateException("blackBackgroundImage为null，存在其它线程修改了值？")
+        val currentColorABackgroundImage = colorABackgroundImage ?: throw IllegalStateException("colorABackgroundImage为null，存在其它线程修改了值？")
+        val currentColorBBackgroundImage = colorBBackgroundImage ?: throw IllegalStateException("colorABackgroundImage为null，存在其它线程修改了值？")
+        val currentColorA = colorA
+        val currentColorB = colorB
+
+        val tolerance = (colorBackgroundTolerance * 100).toInt()
+        val fullTransparentColor = ComputePixel(0, 0, 0, 0).toInt()
+
+        val computeImage = BufferedImage(currentWhiteBackgroundImage.width, currentWhiteBackgroundImage.height, BufferedImage.TYPE_INT_ARGB)
+
+        foreach4ImageBitmap(currentWhiteBackgroundImage, currentBlackBackgroundImage, currentColorABackgroundImage, currentColorBBackgroundImage) { x, y, whitePixel, blackPixel, aPixel, bPixel ->
+            if (whitePixel.alpha == 255
+                && blackPixel.alpha == 255
+                && aPixel.isWithinTolerance(colorA, tolerance)
+                && bPixel.isWithinTolerance(colorB, tolerance)
+            ) {
+                computeImage.setRGB(x, y, fullTransparentColor)
+            } else if (whitePixel == blackPixel && blackPixel == aPixel && aPixel == bPixel) {
+                computeImage.setRGB(x, y, whitePixel.toInt())
+            } else if (
+                aPixel.isWithinTolerance(whitePixel, currentColorA, tolerance)
+                || aPixel.isWithinTolerance(blackPixel, currentColorA, tolerance)
+                || bPixel.isWithinTolerance(whitePixel, currentColorB, tolerance)
+                || bPixel.isWithinTolerance(blackPixel, currentColorB, tolerance)
+            ) {
+                val whiteAAlphaValue = when (colorA) {
+                    RED -> ComputePixel::blue
+                    GREEN -> ComputePixel::red
+                    BLUE -> ComputePixel::green
+                }
+                val blackAAlphaValue = when (colorA) {
+                    RED -> ComputePixel::red
+                    GREEN -> ComputePixel::green
+                    BLUE -> ComputePixel::blue
+                }
+                val whiteBAlphaValue = when (colorB) {
+                    RED -> ComputePixel::green
+                    GREEN -> ComputePixel::blue
+                    BLUE -> ComputePixel::red
+                }
+                val blackBAlphaValue = when (colorB) {
+                    RED -> ComputePixel::red
+                    GREEN -> ComputePixel::green
+                    BLUE -> ComputePixel::blue
+                }
+
+                val whiteAlpha = 255 - (((whiteAAlphaValue(aPixel) - whiteAAlphaValue(whitePixel)).absoluteValue + (whiteBAlphaValue(bPixel) - whiteBAlphaValue(whitePixel)).absoluteValue) / 2)
+                val blackAlpha = 255 - (((blackAAlphaValue(aPixel) - blackAAlphaValue(blackPixel)).absoluteValue + (blackBAlphaValue(bPixel) - blackBAlphaValue(blackPixel)).absoluteValue) / 2)
+
+                val whiteBalance = whiteBlackBalance
+                val blackBalance = 1 - whiteBalance
+
+                val pixel = ComputePixel(
+                    alpha = ((whiteAlpha * whiteBalance) + (blackAlpha * blackBalance)).toInt(),
+                    red = ((whitePixel.red * whiteBalance) + (blackPixel.red * blackBalance)).toInt(),
+                    green = ((whitePixel.green * whiteBalance) + (blackPixel.green * blackBalance)).toInt(),
+                    blue = ((whitePixel.blue * whiteBalance) + (blackPixel.blue * blackBalance)).toInt(),
+                )
+                computeImage.setRGB(x, y, pixel.toInt())
+            } else {
+                computeImage.setRGB(x, y, whitePixel.toInt())
+            }
+        }
+
+
+        val outputStream = ByteArrayOutputStream()
+        ImageIO.write(computeImage, "png", outputStream)
+        previewImageData = outputStream.toByteArray()
+        resetPreview()
+    }
+
+    private fun foreach2ImageBitmap(
+        imageBitmapA: ImageBitmap,
+        imageBitmapB: ImageBitmap,
+        block: (x: Int, y: Int, pixelA: ComputePixel, pixelB: ComputePixel) -> Unit
+    ) {
+        val width = imageBitmapA.width
+        val height = imageBitmapA.height
+
+        val bufferSize = width * height
+        val bufferA = IntArray(bufferSize)
+        val bufferB = IntArray(bufferSize)
+
+        imageBitmapA.readPixels(bufferA, 0, 0, width, height)
+        imageBitmapB.readPixels(bufferB, 0, 0, width, height)
+
+        repeat(height) { y ->
+            repeat(width) { x ->
+                val position = x + (y * width)
+                val pixelA = ComputePixel(bufferA[position])
+                val pixelB = ComputePixel(bufferB[position])
+
+                block(x, y, pixelA, pixelB)
+            }
+        }
+    }
+
+    private fun foreach3ImageBitmap(
+        imageBitmapA: ImageBitmap,
+        imageBitmapB: ImageBitmap,
+        imageBitmapC: ImageBitmap,
+        block: (x: Int, y: Int, pixelA: ComputePixel, pixelB: ComputePixel, pixelC: ComputePixel) -> Unit
+    ) {
         val width = imageBitmapA.width
         val height = imageBitmapA.height
 
@@ -369,33 +476,42 @@ object UiImageData {
 
     }
 
-    private fun foreach2ImageBitmap(imageBitmapA: ImageBitmap, imageBitmapB: ImageBitmap, block: (x: Int, y: Int, pixelA: ComputePixel, pixelB: ComputePixel) -> Unit) {
+    private fun foreach4ImageBitmap(
+        imageBitmapA: ImageBitmap,
+        imageBitmapB: ImageBitmap,
+        imageBitmapC: ImageBitmap,
+        imageBitmapD: ImageBitmap,
+        block: (x: Int, y: Int, pixelA: ComputePixel, pixelB: ComputePixel, pixelC: ComputePixel, pixelD: ComputePixel) -> Unit
+    ) {
         val width = imageBitmapA.width
         val height = imageBitmapA.height
 
         val bufferSize = width * height
         val bufferA = IntArray(bufferSize)
         val bufferB = IntArray(bufferSize)
+        val bufferC = IntArray(bufferSize)
+        val bufferD = IntArray(bufferSize)
 
         imageBitmapA.readPixels(bufferA, 0, 0, width, height)
         imageBitmapB.readPixels(bufferB, 0, 0, width, height)
+        imageBitmapC.readPixels(bufferC, 0, 0, width, height)
+        imageBitmapD.readPixels(bufferD, 0, 0, width, height)
 
         repeat(height) { y ->
             repeat(width) { x ->
                 val position = x + (y * width)
                 val pixelA = ComputePixel(bufferA[position])
                 val pixelB = ComputePixel(bufferB[position])
+                val pixelC = ComputePixel(bufferC[position])
+                val pixelD = ComputePixel(bufferD[position])
 
-                block(x, y, pixelA, pixelB)
+                block(x, y, pixelA, pixelB, pixelC, pixelD)
             }
         }
 
     }
 
-    private fun compute4ImageBitmap() {
-        println("compute4ImageMode")
-        //todo
-    }
+
 }
 
 /**

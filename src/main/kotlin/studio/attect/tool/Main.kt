@@ -155,7 +155,7 @@ fun App(frameWindowScope: FrameWindowScope) {
             Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(uiColor.分割线颜色))
             Row(modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
                 SourceItemPanel(frameWindowScope, modifier = Modifier.weight(1f))
-                ActionPanel(modifier = Modifier.fillMaxHeight())
+                ActionPanel(modifier = Modifier.fillMaxHeight(), frameWindowScope)
             }
             Box(modifier = Modifier.fillMaxWidth().height(1.dp).background(uiColor.分割线颜色))
             Row(modifier = Modifier.fillMaxWidth().background(CurrentUiColor.底部提示条_背景颜色).padding(5.dp)) {
@@ -180,11 +180,12 @@ fun main(args: Array<String>) = application {
     }
 
     UiImageData.whiteBackgroundImageData = FileInputStream(File("F:/透明测试-白背景.png")).readAllBytes()
-//    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/透明测试-黑背景.png")).readAllBytes()
+    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/透明测试-黑背景.png")).readAllBytes()
     UiImageData.colorABackgroundImageData = FileInputStream(File("F:/透明测试-绿背景.png")).readAllBytes()
+    UiImageData.colorBBackgroundImageData = FileInputStream(File("F:/透明测试-蓝背景.png")).readAllBytes()
 
     CurrentUiColor.init()
-    Window(state = windowState, onCloseRequest = ::exitApplication, title = "差色背景去除工具") {
+    Window(state = windowState, onCloseRequest = ::exitApplication, title = "差色图透明器") {
         App(this)
     }
 }
@@ -223,7 +224,7 @@ fun SourceItemPanel(frameWindowScope: FrameWindowScope, modifier: Modifier = Mod
  * 操作面板
  */
 @Composable
-fun ActionPanel(modifier: Modifier = Modifier) {
+fun ActionPanel(modifier: Modifier = Modifier, frameWindowScope: FrameWindowScope) {
     Column(modifier.background(uiColor.操作面板_背景颜色)) {
         DayNightModeSwitchButton(modifier = Modifier.align(Alignment.End))
         Column(modifier = Modifier.padding(16.dp)) {
@@ -233,9 +234,19 @@ fun ActionPanel(modifier: Modifier = Modifier) {
                 Text("计算")
             }
 
-            Button(onClick = {
+            var showSaveFileDialog by remember { mutableStateOf(false) }
 
-            }) {
+            if (showSaveFileDialog) {
+                fileDialogScope.launch {
+                    val dialog = ImageFileDialog(frameWindowScope.window, true, "保存计算结果", onVisibleChange = { showSaveFileDialog = false }, UiImageData::previewImageData)
+                    dialog.isVisible = true
+                }
+            }
+            Button(onClick = {
+                if (!showSaveFileDialog) {
+                    showSaveFileDialog = true
+                }
+            }, enabled = UiImageData.previewImage != null) {
                 Text("保存")
             }
         }
@@ -450,7 +461,7 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
 
     if (showSelectFileDialog) {
         fileDialogScope.launch {
-            val dialog = ImageFileDialog(frameWindowScope.window, contentDescription, onVisibleChange = { showSelectFileDialog = false }, targetByteArray)
+            val dialog = ImageFileDialog(frameWindowScope.window, false, contentDescription, onVisibleChange = { showSelectFileDialog = false }, targetByteArray)
             dialog.isVisible = true
         }
     }
