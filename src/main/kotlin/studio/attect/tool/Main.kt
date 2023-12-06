@@ -526,37 +526,50 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                 }
         ) {
             imageBitmap?.let {
-                Image(
-                    BitmapPainter(it), contentDescription,
-                    contentScale = ContentScale.Fit,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f)
-                        .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
-                        .background(
-                            when (targetByteArray) {
-                                UiImageData::whiteBackgroundImageData -> Color.White
-                                UiImageData::blackBackgroundImageData -> Color.Black
-                                UiImageData::colorABackgroundImageData -> {
-                                    when (UiImageData.colorA) {
-                                        RED -> Color.Red
-                                        GREEN -> Color.Green
-                                        BLUE -> Color.Blue
+                Box(modifier = Modifier.fillMaxWidth().weight(1f)) {
+                    Image(
+                        BitmapPainter(it), contentDescription,
+                        contentScale = ContentScale.Fit,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(bottomStart = 16.dp, bottomEnd = 16.dp))
+                            .background(
+                                when (targetByteArray) {
+                                    UiImageData::whiteBackgroundImageData -> Color.White
+                                    UiImageData::blackBackgroundImageData -> Color.Black
+                                    UiImageData::colorABackgroundImageData -> {
+                                        when (UiImageData.colorA) {
+                                            RED -> Color.Red
+                                            GREEN -> Color.Green
+                                            BLUE -> Color.Blue
+                                        }
                                     }
-                                }
 
-                                UiImageData::colorBBackgroundImageData -> {
-                                    when (UiImageData.colorB) {
-                                        RED -> Color.Red
-                                        GREEN -> Color.Green
-                                        BLUE -> Color.Blue
+                                    UiImageData::colorBBackgroundImageData -> {
+                                        when (UiImageData.colorB) {
+                                            RED -> Color.Red
+                                            GREEN -> Color.Green
+                                            BLUE -> Color.Blue
+                                        }
                                     }
-                                }
 
-                                else -> Color.Transparent
-                            }
-                        )
-                )
+                                    else -> Color.Transparent
+                                }
+                            )
+                    )
+
+                    Box(modifier = Modifier
+                        .clip(RoundedCornerShape(0.dp, 0.dp, 6.dp, 0.dp))
+                        .background(Color.White.copy(alpha = .5f))
+                        .width(18.dp).height(18.dp)
+                        .clickable {
+                            targetByteArray.set(ByteArray(0))
+                        }
+                        .padding(2.dp)) {
+                        Image(painter = painterResource("icon/delete.svg"), contentDescription = "清除")
+                    }
+                }
+
             } ?: run {
                 Box(Modifier.fillMaxWidth().weight(1f)) {
                     Text(hintText, color = CurrentUiColor.素材项_文字颜色, modifier = Modifier.align(Alignment.Center), fontSize = 12.sp)

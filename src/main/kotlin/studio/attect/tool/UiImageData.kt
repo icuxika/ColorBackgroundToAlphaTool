@@ -71,7 +71,11 @@ object UiImageData {
      */
     var blackBackgroundImageData = ByteArray(0)
         set(value) {
-            blackBackgroundImage = loadImageBitmap(ByteArrayInputStream(value))
+            blackBackgroundImage = if (value.isNotEmpty()) {
+                loadImageBitmap(ByteArrayInputStream(value))
+            } else {
+                null
+            }
             field = value
         }
 
@@ -87,7 +91,11 @@ object UiImageData {
      */
     var whiteBackgroundImageData = ByteArray(0)
         set(value) {
-            whiteBackgroundImage = loadImageBitmap(ByteArrayInputStream(value))
+            whiteBackgroundImage = if (value.isNotEmpty()) {
+                loadImageBitmap(ByteArrayInputStream(value))
+            } else {
+                null
+            }
             field = value
         }
 
@@ -113,7 +121,11 @@ object UiImageData {
      */
     var colorABackgroundImageData = ByteArray(0)
         set(value) {
-            colorABackgroundImage = loadImageBitmap(ByteArrayInputStream(value))
+            colorABackgroundImage = if (value.isNotEmpty()) {
+                loadImageBitmap(ByteArrayInputStream(value))
+            } else {
+                null
+            }
             field = value
         }
 
@@ -133,7 +145,11 @@ object UiImageData {
      */
     var colorBBackgroundImageData = ByteArray(0)
         set(value) {
-            colorBBackgroundImage = loadImageBitmap(ByteArrayInputStream(value))
+            colorBBackgroundImage = if (value.isNotEmpty()) {
+                loadImageBitmap(ByteArrayInputStream(value))
+            } else {
+                null
+            }
             field = value
         }
 
@@ -215,14 +231,15 @@ object UiImageData {
     fun compute() {
         if (!checkBeforeCompute()) return
         if (((whiteBackgroundImage == null && blackBackgroundImage != null) || (whiteBackgroundImage != null && blackBackgroundImage == null))
-            &&
-            ((colorABackgroundImage == null && colorBBackgroundImage != null) || (colorABackgroundImage != null && colorBBackgroundImage == null))
+            && !(colorABackgroundImage == null && colorBBackgroundImage == null)
         ) {
             compute2ImageMode()
         } else if (colorABackgroundImage == null || colorBBackgroundImage == null) {
             compote3ImageMode()
-        } else if (colorABackgroundImage != null && colorBBackgroundImage != null) {
+        } else if (whiteBackgroundImage != null && blackBackgroundImage != null && colorABackgroundImage != null && colorBBackgroundImage != null) {
             compute4ImageBitmap()
+        } else {
+            globalHint = "请补全必要的素材"
         }
     }
 
