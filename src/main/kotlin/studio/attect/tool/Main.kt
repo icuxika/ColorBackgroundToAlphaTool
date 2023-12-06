@@ -45,7 +45,6 @@ import java.awt.Cursor
 import java.awt.Toolkit
 import java.awt.image.BufferedImage
 import java.io.File
-import java.io.FileInputStream
 import java.net.URI
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.ceil
@@ -179,13 +178,8 @@ fun main(args: Array<String>) = application {
         windowState.size = DpSize((screenSize.width * 0.6).dp, (screenSize.height * 0.6).dp)
     }
 
-    UiImageData.whiteBackgroundImageData = FileInputStream(File("F:/透明测试-白背景.png")).readAllBytes()
-    UiImageData.blackBackgroundImageData = FileInputStream(File("F:/透明测试-黑背景.png")).readAllBytes()
-    UiImageData.colorABackgroundImageData = FileInputStream(File("F:/透明测试-绿背景.png")).readAllBytes()
-    UiImageData.colorBBackgroundImageData = FileInputStream(File("F:/透明测试-蓝背景.png")).readAllBytes()
-
     CurrentUiColor.init()
-    Window(state = windowState, onCloseRequest = ::exitApplication, title = "差色图透明器") {
+    Window(state = windowState, onCloseRequest = ::exitApplication, title = "差色图透明工具") {
         App(this)
     }
 }
