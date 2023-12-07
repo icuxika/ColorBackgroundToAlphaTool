@@ -1,5 +1,6 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import java.util.*
 
 plugins {
     kotlin("jvm")
@@ -40,8 +41,24 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "ColorBackgroundToAlphaTool"
+            packageName = "差色背景透明工具"
             packageVersion = "1.0.0"
+            vendor = "Attect"
+            description = "将同一主体多张不同色彩背景的图片进行背景透明化处理"
+            copyright = "@2023 Attect All Rights Reversed"
+            macOS {
+                dockName = "差色背景透明工具"
+                iconFile.set(project.file("icons/app.icns"))
+            }
+            linux {
+                iconFile.set(project.file("icons/app.png"))
+            }
+            windows {
+                shortcut = true
+                dirChooser = true
+                upgradeUuid = UUID.randomUUID().toString()
+                iconFile.set(project.file("icons/app.ico"))
+            }
         }
     }
 }

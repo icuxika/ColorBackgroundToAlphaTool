@@ -160,6 +160,25 @@ object UiImageData {
     var colorBackgroundTolerance by mutableStateOf(0f)
 
     /**
+     * 自定义预览背景
+     */
+    var previewBackgroundImage by mutableStateOf<ImageBitmap?>(null)
+
+    /**
+     * 自定义背景图片的数据
+     * <br>
+     * 实际上不持有，只用于影响[previewBackgroundImage]
+     */
+    var previewBackgroundImageData = ByteArray(0)
+        set(value) {
+            previewBackgroundImage = if (value.isNotEmpty()) {
+                loadImageBitmap(ByteArrayInputStream(value))
+            } else {
+                null
+            }
+        }
+
+    /**
      * 计算前的数据检查
      */
     private fun checkBeforeCompute(): Boolean {
@@ -536,16 +555,4 @@ object UiImageData {
  */
 private fun ImageBitmap.compareSize(otherImageBitmap: ImageBitmap): Boolean {
     return width == otherImageBitmap.width && height == otherImageBitmap.height
-}
-
-private fun ImageBitmap.foreach(block: (x: Int, y: Int, pixel: ComputePixel) -> Unit) {
-    val buffer = intArrayOf(width * height)
-    readPixels(buffer)
-
-    repeat(height) { y ->
-        repeat(width) { x ->
-            val pixel = ComputePixel(buffer[x + (y * width)])
-            block(x, y, pixel)
-        }
-    }
 }

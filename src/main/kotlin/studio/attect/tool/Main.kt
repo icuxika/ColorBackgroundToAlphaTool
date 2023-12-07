@@ -77,13 +77,20 @@ fun App(frameWindowScope: FrameWindowScope) {
                     if (currentImage == null) {
                         Text("请按底部提示提供素材", color = uiColor.预览区_文字颜色, fontSize = 24.sp, fontWeight = FontWeight.Bold, modifier = Modifier.align(Alignment.Center))
                     } else {
-                        Box(modifier = Modifier
+                        //画自定义背景
+                        UiImageData.previewBackgroundImage?.let { backgroundImage ->
+                            Image(backgroundImage, "自定义预览背景", modifier = Modifier.fillMaxSize(), contentScale = ContentScale.Fit)
+                        }
+
+                        //预览图片的一些鼠标操作
+                        var boxModifier = Modifier
                             .fillMaxSize()
                             .onDrag { offset ->
                                 UiImageData.previewImageOffsetX += offset.x
                                 UiImageData.previewImageOffsetY += offset.y
                             }
-                            .drawBehind {
+                        if (UiImageData.previewBackgroundImage == null) {
+                            boxModifier = boxModifier.drawBehind {
                                 val xCount = ceil(size.width / 10).toInt()
                                 val yCount = ceil(size.height / 10).toInt()
                                 repeat(yCount) { y ->
@@ -96,7 +103,8 @@ fun App(frameWindowScope: FrameWindowScope) {
                                     }
                                 }
                             }
-                            .onPointerEvent(PointerEventType.Move) {
+                        }
+                        boxModifier = boxModifier.onPointerEvent(PointerEventType.Move) {
                                 if (UiImageData.previewMouseRotationLock) {
                                     if (UiImageData.previewMouseRotationStartX != Float.MIN_VALUE) {
                                         UiImageData.previewImageRotate += UiImageData.previewMouseRotationStartX - it.changes.first().position.x
@@ -131,15 +139,15 @@ fun App(frameWindowScope: FrameWindowScope) {
                                     }
                                 }
                             }
-                        ) {
+                        Box(modifier = boxModifier) {
                             Box(modifier = Modifier.fillMaxSize()
                                 .scale(UiImageData.previewImageScale)
                                 .offset {
-                                    IntOffset(UiImageData.previewImageOffsetX.toInt(), UiImageData.previewImageOffsetY.toInt())
+                                    IntOffset((UiImageData.previewImageOffsetX / UiImageData.previewImageScale).toInt(), (UiImageData.previewImageOffsetY / UiImageData.previewImageScale).toInt())
                                 }) {
 
                                 Image(
-                                    currentImage, contentDescription = "预览图片", contentScale = ContentScale.None, modifier = Modifier
+                                    currentImage, contentDescription = "预览图片", contentScale = ContentScale.Inside, modifier = Modifier
                                         .fillMaxSize()
                                         .rotate(UiImageData.previewImageRotate)
                                 )
@@ -178,8 +186,15 @@ fun main(args: Array<String>) = application {
         windowState.size = DpSize((screenSize.width * 0.6).dp, (screenSize.height * 0.6).dp)
     }
 
+    val icon = painterResource("icon/app.png")
+
     CurrentUiColor.init()
-    Window(state = windowState, onCloseRequest = ::exitApplication, title = "差色图透明工具") {
+    Window(
+        state = windowState,
+        onCloseRequest = ::exitApplication,
+        title = "差色图透明工具",
+        icon = icon
+    ) {
         App(this)
     }
 }
@@ -196,6 +211,7 @@ fun SourceItemPanel(frameWindowScope: FrameWindowScope, modifier: Modifier = Mod
             SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.blackBackgroundImage, contentDescription = "黑色背景图片", noImageText = "点击添加黑色背景图片", targetByteArray = UiImageData::blackBackgroundImageData)
             SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.colorABackgroundImage, contentDescription = "纯色A背景图片", noImageText = "点击添加纯色A背景图片", targetByteArray = UiImageData::colorABackgroundImageData)
             SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.colorBBackgroundImage, contentDescription = "纯色B背景图片", noImageText = "点击添加纯色B背景图片", targetByteArray = UiImageData::colorBBackgroundImageData)
+            SelectImageItem(frameWindowScope = frameWindowScope, imageBitmap = UiImageData.previewBackgroundImage, contentDescription = "预览区背景图片", noImageText = "默认格子图背景", targetByteArray = UiImageData::previewBackgroundImageData)
         }
         HorizontalScrollbar(
             modifier = Modifier.align(Alignment.BottomStart)
@@ -545,6 +561,9 @@ fun SelectImageItem(modifier: Modifier = Modifier, frameWindowScope: FrameWindow
                                             GREEN -> Color.Green
                                             BLUE -> Color.Blue
                                         }
+                                    }
+                                    UiImageData::previewBackgroundImageData -> {
+                                        Color.White
                                     }
 
                                     else -> Color.Transparent
