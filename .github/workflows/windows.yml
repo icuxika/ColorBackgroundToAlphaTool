@@ -8,7 +8,7 @@ jobs:
   build-app:
     strategy:
       matrix:
-        os: [ windows-2019 ]
+        os: [ windows-2022 ]
     name: Build the application
     runs-on: ${{ matrix.os }}
     steps:
@@ -20,8 +20,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: 21
-
-      - run: $Env:Path += ";C:\Program Files (x86)\WiX Toolset v3.11\bin"
 
       - name: build
         run: .\gradlew.bat packageDistributionForCurrentOS
