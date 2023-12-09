@@ -41,13 +41,13 @@ compose.desktop {
 
         nativeDistributions {
             targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "差色背景透明工具"
+            packageName = "ColorBackgroundToAlphaTool"
             packageVersion = "1.0.0"
             vendor = "Attect"
-            description = "将同一主体多张不同色彩背景的图片进行背景透明化处理"
+            description = "Background transparency of multiple pictures of the same subject with different color backgrounds"
             copyright = "@2023 Attect All Rights Reversed"
             macOS {
-                dockName = "差色背景透明工具"
+                dockName = "ColorBackgroundToAlphaTool"
                 iconFile.set(project.file("icons/app.icns"))
             }
             linux {
